@@ -6,7 +6,7 @@ import datetime
 
 #global vars
 path = "."
-all_files = glob.glob(os.path.join(path, "data*.csv")) #make list of files in path
+all_files = glob.glob(os.path.join(path, "Track*.csv")) #make list of files in path
 now = datetime.datetime.now() #get current date for output file
 
 
@@ -16,7 +16,7 @@ xmlHeader = '<?xml version="1.0" encoding="UTF-8"?> <kml xmlns="http://earth.goo
 xmlFooter = '</coordinates>  </LineString>  <Style>   <LineStyle> <color>#ff0000ff</color>    <width>5</width>   </LineStyle>  </Style> </Placemark> </Document> </kml>'
 
 
-def pointConcat(d):
+def pointConcat(df):
     for index, row in df.iterrows():
         line =  str(row[0]) + ',' +  str(row[1]) + ',' + str(row[2]) + '.'
         f.write(line + '\n')

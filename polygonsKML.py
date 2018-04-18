@@ -15,7 +15,7 @@ now = datetime.datetime.now() #get current date for output file
 
 f = open('Line' + str(now.day) + str(now.month) + str(now.year)  + '.kml', 'w')#open output file with current date
 
-xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Placemark>\n<name>MGM Poligonos</name>\n<Polygon>\n'
+xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Placemark>\n<name>MGM Poligonos</name>\n<Polygon>\n<extrude>1</extrude>\n<altitudeMode>relativeToGround</altitudeMode>\n'
 xmlFooter = '\n</Polygon>\n</Placemark>\n</kml>\n'
 
 

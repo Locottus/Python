@@ -12,11 +12,14 @@ path = "."
 all_files = glob.glob(os.path.join(path, "*.csv")) #make list of files in path
 now = datetime.datetime.now() #get current date for output file
 
+fname = 'Polygon' + str(now.day) + str(now.month) + str(now.year)  + '.kml'
+f = open(fname , 'w')#open output file with current date
 
-f = open('Line' + str(now.day) + str(now.month) + str(now.year)  + '.kml', 'w')#open output file with current date
+xmlHeader = """<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>\n"""
 
-xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Placemark>\n<name>MGM Poligonos</name>\n<Polygon>\n<extrude>1</extrude>\n<altitudeMode>relativeToGround</altitudeMode>\n'
-xmlFooter = '\n</Polygon>\n</Placemark>\n</kml>\n'
+xmlFooter = '\n</Document>\n</kml>\n'
 
 
 def pointConcat(df):
@@ -26,7 +29,15 @@ def pointConcat(df):
         print(line)
 
 def polygonCreation(df,p):
-    line = '\n<outerBoundaryIs>\n<LinearRing>\n<coordinates>\n'
+    line = """\n<Placemark>
+		<name>""" + p + """</name>
+		<Polygon>
+			<tessellate>1</tessellate>
+			<extrude>1</extrude>
+			<gx:altitudeMode>relativeToGround</gx:altitudeMode>
+			<outerBoundaryIs>
+				<LinearRing>
+					<coordinates>\n"""
     f.write(line)
     strude = str(decimal.Decimal(random.randrange(250, 400))/100)#random strude from 2.50 to 4.00
     for index, row in df.iterrows():
@@ -34,7 +45,12 @@ def polygonCreation(df,p):
             line = str(row[0]) + ',' +  str(row[1]) + ',' + strude
             f.write(line + '\n')
             print(line)
-    line = '\n</coordinates>\n</LinearRing>\n</outerBoundaryIs>\n'
+    line = """					</coordinates>
+				</LinearRing>
+			</outerBoundaryIs>
+		</Polygon>
+	</Placemark>
+\n"""
     f.write(line)
     
 #main()
@@ -55,6 +71,7 @@ for file in all_files:
 
 f.write(xmlFooter+ '\n')#write footer
 f.close()
+print('end of line')
 
 
 

@@ -38,8 +38,8 @@ def polygonCreation(df,p):
 
     for index, row in df.iterrows():
         if (str(row[6]) == p ):
-            line = str(row[0]) + ',' +  str(row[1]) + ',' + str(row[2])
-            f.write(line + ' ')
+            line = str(row[0]) + ',' +  str(row[1]) + ',' + str(row[2]) + '\n'
+            f.write(line + ' \n')
             print(line)
     line = """\n					</coordinates>
 		</LineString>

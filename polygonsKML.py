@@ -41,7 +41,7 @@ def polygonCreation(df,p):
     f.write(line)
     strude = str(decimal.Decimal(random.randrange(250, 400))/100)#random strude from 2.50 to 4.00
     for index, row in df.iterrows():
-        if (str(row[6]) == p ):
+        if ((str(row[6]) == p )):
             line = str(row[0]) + ',' +  str(row[1]) + ',' + strude
             f.write(line + '\n')
             print(line)
@@ -52,6 +52,12 @@ def polygonCreation(df,p):
 	</Placemark>
 \n"""
     f.write(line)
+
+def isPolygon(df,p):
+    for index, row in df.iterrows():
+        if ((str(row[6]) == str(p))):
+            return row[7];
+    return False
     
 #main()
 f.write(xmlHeader + '\n')#write header
@@ -64,8 +70,9 @@ for file in all_files:
     df = pd.DataFrame(dataFile)
     polygons = df[6].unique()
     for p in polygons:
-        print('******' + p)
-        polygonCreation(df,p)
+        if (isPolygon(df,p)):
+            print('******' + str(p))
+            polygonCreation(df,str(p))
         
     #pointConcat(df)
 
@@ -78,4 +85,4 @@ print('end of line')
 
 
 #my output file contains Longitude,Latitude,Altitude in a csv file.
-#-90.5298628393332,14.608550970260422,1524.911447514169,2.1963847,1519558183000,8.0,comment
+#-90.5298628393332,14.608550970260422,1524.911447514169,2.1963847,1519558183000,8.0,comment,TRUE,num_poly

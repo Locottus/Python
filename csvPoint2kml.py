@@ -18,11 +18,12 @@ xmlFooter = '\n</Document>\n</kml>'
 
 def pointConcat(df):
     for index, row in df.iterrows():
-        #line =  '<Placemark><Point><coordinates>' + str(row[0]) + ',' +  str(row[1]) + ',' + str(row[2]) + '.</coordinates></Point></Placemark>'
-        line =  '<Placemark><description>' +str(row[6]) +'</description><Point><coordinates>' + str(row[0]) + ',' +  str(row[1]) + ',' + str(row[2]) + '.</coordinates></Point></Placemark>'
-        if (str(row[0]) <> '0.0'):
-            f.write( line + '\n')
-            print(line)
+        if(row[7] == False):
+            #line =  '<Placemark><Point><coordinates>' + str(row[0]) + ',' +  str(row[1]) + ',' + str(row[2]) + '.</coordinates></Point></Placemark>'
+            line =  '<Placemark><description>' +str(row[6]) +'</description><Point><coordinates>' + str(row[0]) + ',' +  str(row[1]) + ',' + str(row[2]) + '.</coordinates></Point></Placemark>'
+            if (str(row[0]) <> '0.0'):
+                f.write( line + '\n')
+                print(line)
 
 #main()
 f.write(xmlHeader + '\n')#write header

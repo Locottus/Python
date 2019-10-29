@@ -1,41 +1,72 @@
-import os,sys, psycopg2,flask,jsonify
+import os,sys, psycopg2,flask,jsonify,request
 
-conn_string = "host='dogmail.cloudapp.net' dbname='dmswitch' user='postgres' password='password'"
+#https://tecadmin.net/install-python-3-7-on-ubuntu-linuxmint/
+
+conn_string = "host='localhost' dbname='swift' user='postgres' password='Guatemala1'"
 
 
-def hacequery():
-    #print the connection string we will use to connect
-    #print "Connecting to database\n	->%s" % (conn_string)
-    #get a connection, if a connect cannot be made an exception will be raised here
+def hacequery(toMsg):
     conn = psycopg2.connect(conn_string)
-
-    # conn.cursor will return a cursor object, you can use this cursor to perform queries
+    list = []
     cursor = conn.cursor()
-    cursor.execute("""select * from test where campo2 = 'gonzalez'""")
+    cursor.execute("""select * from public."offlineChat" where tomsg = '"""+ toMsg +"'")
     rows = cursor.fetchall()
     rString = ""
     for row in rows:
-        rString = "{\"name\":\"" + row[0] +"\",\"lastname\":\"" + row[1] +"\",\"status\":\"" + str(row[2]) + "\"}, "  + rString
-        #print rString
-        #print "   ", row[0],row[1],row[2]
+        rString = "{\"msg\":\"" + row[0] +"\",\"tomsg\":\"" + row[1] +"\",\"sent\":\"" + str(row[2]) + "\",\"datetime\":\"" + str(row[3]) +"\"}"
+        list.append(rString)
+        print (rString)
     conn.close()
-    return rString
+    return list
 
-from flask import Flask
+
+
+
+from flask import Flask,request
 
 app = Flask(__name__)
-
 
 
 #@app.route('/todo/api/v1.0/tasks', methods=['GET'])
 #def get_tasks():
 #    return jsonify({'tasks': tasks})
 
+#http://localhost:5000/api/get?username=herlich&password=pwd1
+@app.route('/api/get',methods=['GET'])
+def getMsgs():
+    #username = request.args.get('username')
+    #password = request.args.get('password')
+    id = request.args.get('id')
+    #msg = request.args.get('msg')
+    print(username +  " " + password)
+    #username = "herlich"
+    return """{\"msg\":\"ok\"}"""
 
-@app.route('/Services/Mobile',methods=['GET'])
-def index():
-    return "[" + hacequery() + "{}]"
+
+#http://localhost:5000/api/get
+@app.route('/api/getJ',methods=['GET'])
+def getMsgsJ():
+    req_data = request.get_json()
+    msg = req_data['msg']
+    #username = "herlich"
+    print(msg)
+    return """{\"msg\":\"ok\"}"""
+
+
+#http://localhost:5000/api/post
+@app.route('/api/post',methods=['POST'])
+def postMsg():
+    print('posting')
+    req_data = request.get_json()
+    msg = req_data['msg']
+    #hacequery("herlich@gmail.com")
+    print(msg)
+    return """{\"msg\":\"ok\"}"""#requests.status_codes._codes[200]
+    
+
+
 
 if __name__ == '__main__':
     #app.run(debug=True)
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='localhost', port=5000)
+#    hacequery("herlich@gmail.com")

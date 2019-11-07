@@ -5,17 +5,17 @@ from flask_cors import CORS
 #https://bitlaunch.io/blog/create-a-bitcoin-node-with-ubuntu/
 
 conn_string = "host='localhost' dbname='swift' user='postgres' password='Guatemala1'"
-
+NETWORK = 'testnet'
 
 def getMessages(toMsg):
     from psycopg2.extras import RealDictCursor
     conn = psycopg2.connect(conn_string)
     list = []
     cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("""select msg, tomsg, sent, datetime from public."offlineChat" where tomsg = '"""+ toMsg +"'")
+    cursor.execute("""select msg from public."offlineChat" where tomsg = '"""+ toMsg +"'")
     l = json.dumps(cursor.fetchall(),indent = 2)
     conn.close()
-    borrarMensaje(toMsg)
+    #borrarMensaje(toMsg)
     return l
 
 def grabaMensaje(data):
@@ -50,14 +50,58 @@ def borrarMensaje(tomsg):
 
 
 
+#https://github.com/ranaroussi/pywallet
+def wall3():
+    # create_btc_wallet.py
+    from pywallet import wallet
+    # generate 12 word mnemonic seed
+    seed = wallet.generate_mnemonic()
+    # create bitcoin wallet
+    w = wallet.create_wallet(network="BTC", seed=seed, children=1)
+    #print(w)
+    #print(w["private_key"])
+    return str(w)
+
+
+def createKey(WALLET_PUBKEY,childNumber):
+    from pywallet import wallet
+    #WALLET_PUBKEY = 'YOUR WALLET XPUB'
+    # generate address for specific user (id = 10)
+    print(WALLET_PUBKEY)
+    print(childNumber)
+    user_addr = wallet.create_address(network="BTC", xpub=WALLET_PUBKEY, child=int(childNumber))
+    # or generate a random address, based on timestamp
+    rand_addr = wallet.create_address(network="BTC", xpub=WALLET_PUBKEY)
+    json = "[ " + str(user_addr) + " , " + str(rand_addr) + " ]"  
+    #print("User Address\n", user_addr)
+    #print("Random Address\n", rand_addr)
+    print(json)
+    return json
+
 from flask import Flask,request
 app = Flask(__name__)
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
-#@app.route('/todo/api/v1.0/tasks', methods=['GET'])
-#def get_tasks():
-#    return jsonify({'tasks': tasks})
+
+#http://localhost:1500/api/getNewChild?publicKey=xpub661MyMwAqRbcGsyLJDoXQeiW8cwuqhoyUcuKq6hG2x9Wp9fKtD2zkDR2uDqTrxMFAskzBTWDmoDssaoUHvTWo6aUntmTBwPvvF2doLCQJ2d&publicChildNum=11
+@app.route('/api/getNewChild',methods=['GET'])
+def createNewChildWallet():
+    publicKey = request.args.get('publicKey')
+    publicChildNum = request.args.get('publicChildNum')
+    print(publicKey)
+    print(publicChildNum)
+    return createKey(publicKey,publicChildNum)
+
+
+#http://localhost:1500/api/createWallet?id=herlich@gmail.com
+@app.route('/api/createWallet',methods=['GET'])
+def createWallet():
+    id = request.args.get('id')
+    #msg = request.args.get('msg')
+    print('get messages from: ' + id)
+    return wall3()
+
 
 
 #http://localhost:5000/api/get?username=herlich&password=pwd1
@@ -67,6 +111,7 @@ def getMsgs():
     #msg = request.args.get('msg')
     print('get messages from: ' + id)
     return getMessages(id)#"""{\"msg\":\"ok\"}"""
+    #return """{\"msg\":\"ok\"}"""
 
 
 #http://localhost:5000/api/get
@@ -84,7 +129,8 @@ def getMsgsJ():
 def postMsg():
     print('posting message')
     req_data = request.get_json()
-    grabaMensaje(req_data)
+    print(req_data)
+    #grabaMensaje(req_data)
     return """{\"msg\":\"ok\"}"""#requests.status_codes._codes[200]
     
 
@@ -93,4 +139,7 @@ def postMsg():
 if __name__ == '__main__':
     #app.run(debug=True)
     print("starting chat service")
-    app.run(host='localhost', port=1500)
+    #app.run(ssl_context='adhoc',host='0.0.0.0', port=1500)
+    app.run(host='0.0.0.0', port=1500)
+    #createKey('xpub661MyMwAqRbcGsyLJDoXQeiW8cwuqhoyUcuKq6hG2x9Wp9fKtD2zkDR2uDqTrxMFAskzBTWDmoDssaoUHvTWo6aUntmTBwPvvF2doLCQJ2d',11)
+

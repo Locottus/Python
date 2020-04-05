@@ -31,9 +31,10 @@ cfg = {
 def insertaTwitt(tjson,tstr):
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
+    print(tjson)
 #    cursor.execute(""" delete from test where campo1 = 'David'  """)
-    cursor.execute(" insert into fase1 (twitt,twittstr) values (" + str(tjson) + ",'" + tstr + "')")
-    #conn.commit()
+    cursor.execute(" insert into fase1 (twitterjson,twitterstr) values ('" + json.dumps(tjson) + "','" + str(tstr).replace("'",'"') + "')")
+    conn.commit()
     conn.close()
 
 
@@ -89,22 +90,29 @@ def getTweets(sw,date,number):
     #json.dumps(m)
     #print(m)
     mined = {
-                    'id':        item.id,
+                    'id':              item.id,
                     'name':            item.user.name,
                     'screen_name':     item.user.screen_name,
                     'retweet_count':   item.retweet_count,
                     'text':            item.text,
-                    'mined_at':        datetime.datetime.now(),
-                    'created_at':      item.created_at,
-                    'favourite_count': item.favorite_count,
+                    'created_at':      str(item.created_at),
+                    'favorite_count': item.favorite_count,
                     'hashtags':        item.entities['hashtags'],
                     'status_count':    item.user.statuses_count,
-                    'location':        item.place,
-                    'source':   item.source
+                    'location':        str(item.place),
+                    'source':          item.source
                 }
-    print(mined)
-    #insertaTwitt(mined,s)
+    #print(mined)
+    #minedS = minedS.replace("'",'"')
+    insertaTwitt(str(mined).replace("'",'"'),s)
+
+def getToday():
+    from datetime import date
+    return date.today()
+
 
 if __name__ == "__main__":
   #sendTwitt()
-  getTweets("#COVID2019","2020-02-16",1)
+  #print (getToday())
+ # getTweets("#COVID2019, #GUATEMALA",getToday(),1)
+  getTweets("#SOSAGUA, #GUATEMALA",getToday(),1)

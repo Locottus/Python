@@ -64,6 +64,11 @@ def principal():
         updateTabla(updateStatus(data))   
 
 
+def getToday():
+    from datetime import date
+    return date.today()
+    
+
 #void main()
 print('programa inicia')
 while(True):

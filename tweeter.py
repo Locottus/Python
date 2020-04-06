@@ -27,13 +27,25 @@ cfg = {
   "access_token_secret" : "332CPmsifvklzEK33F99flSAde5zz71fCiaz4V1P6qYIs" 
   }
 
+#****************************************FASE 1 *******************************************
+
+'''
+create table public.fase1(
+	id SERIAL PRIMARY KEY,
+	fecha timestamp without time zone DEFAULT now(),
+	twitjson json not null ,
+	twitstring text not null ,
+	origen text null
+)
+
+'''
 
 def insertaTwitt(tjson,tstr):
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     print(tjson)
 #    cursor.execute(""" delete from test where campo1 = 'David'  """)
-    cursor.execute(" insert into fase1 (twitterjson,twitterstr) values ('" + json.dumps(tjson) + "','" + str(tstr).replace("'",'"') + "')")
+    cursor.execute(" insert into fase1 (twitjson,twitstring,origen) values ('" + json.dumps(tjson) + "','" + str(tstr).replace("'",'"') + "','Twitter')")
     conn.commit()
     conn.close()
 
@@ -62,22 +74,20 @@ class msg:
     self.user = user
   
 
-def getTweets(sw,date,number):
+def getTweets(search_words,date_since,number):
   api = get_api(cfg)
-  search_words = sw#"#COVID2019"
-  date_since = date
+  #"#COVID2019"
   tweets = tweepy.Cursor(api.search,
               q=search_words,
-              lang="en",
+              lang="es",
               since=date_since).items(number)
   # Iterate and print tweets
-
-  
   
   for item in tweets:
     s = item#este es el string
     #print(s)
-      #print(tweet.text)
+    #print(tweet.text)
+    #print(
     #print(tweet.created_at)
     #print(tweet.id)
     #print(tweet.id_str)
@@ -90,17 +100,21 @@ def getTweets(sw,date,number):
     #json.dumps(m)
     #print(m)
     mined = {
-                    'id':              item.id,
-                    'name':            item.user.name,
-                    'screen_name':     item.user.screen_name,
-                    'retweet_count':   item.retweet_count,
-                    'text':            item.text,
-                    'created_at':      str(item.created_at),
-                    'favorite_count': item.favorite_count,
-                    'hashtags':        item.entities['hashtags'],
-                    'status_count':    item.user.statuses_count,
-                    'location':        str(item.place),
-                    'source':          item.source
+                    "id":              item.id,
+                    "name":            item.user.name,
+                    "screen_name":     item.user.screen_name,
+                    "retweet_count":   item.retweet_count,
+                    "text":            item.text,
+                    "location":        item.user.location,
+                    "coordinates":     str(item.coordinates),
+                    "geo_enabled":     str(item.user.geo_enabled),
+                    "geo":             str(item.geo),
+                    "created_at":      str(item.created_at),
+                    "favorite_count": item.favorite_count,
+                    "hashtags":        item.entities['hashtags'],
+                    "status_count":    item.user.statuses_count,
+                    "location":        str(item.place),
+                    "source":          item.source
                 }
     #print(mined)
     #minedS = minedS.replace("'",'"')
@@ -111,8 +125,22 @@ def getToday():
     return date.today()
 
 
+
+#****************************FASE 2******************************************
+
+
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
   #sendTwitt()
-  #print (getToday())
- # getTweets("#COVID2019, #GUATEMALA",getToday(),1)
-  getTweets("#SOSAGUA, #GUATEMALA",getToday(),1)
+  print("FASE 1 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
+  #getTweets("#sosagua",getToday(),100)
+  print('FASE 2 --> AGREGANDO COORDENADAS AL QUERY')
+  print('FASE 3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION')
+  

@@ -1,6 +1,7 @@
 import tweepy,psycopg2,os,json,datetime
 
 '''
+HERLICH STEVEN GONZALEZ ZAMBRANO 2020 --> EN CUARENTENA MUNDIAL
 API key:
 bCgXMvHfVr1f86jrcwJSIbfyU
 API secret key:
@@ -84,20 +85,8 @@ def getTweets(search_words,date_since,number):
   
   for item in tweets:
     s = item#este es el string
-    #print(s)
-    #print(tweet.text)
-    #print(
-    #print(tweet.created_at)
-    #print(tweet.id)
-    #print(tweet.id_str)
-    #print(tweet.text)
-    #print(tweet.entities)
-    #print(tweet.metadata)
-    #print(tweet.source)
-    #print(tweet.user)
     #m = msg(tweet.created_at,tweet.id,tweet.id_str,tweet.text,tweet.entities,tweet.metadata,tweet.source,tweet.user)#este sera el json
     #json.dumps(m)
-    #print(m)
     mined = {
                     "id":              item.id,
                     "name":            item.user.name,
@@ -156,13 +145,7 @@ def getLocation():
     conn.close()
     #print(l)  
     return l
-'''
-select m1.id,fase1.id
-from municipios m1, municipios m2, fase1 
-where m1.id = m2.id
-and fase1.twitstring like '%' || m1.departamen_1 || '%'
-and fase1.twitstring like '%' || m2.municipi_1 || '%'
-'''
+
 def fase2(fecha):
     query = "insert into public.fase2 ( municipios , fase1 )  select m1.id,fase1.id   from municipios m1, municipios m2, fase1 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
     print(query)
@@ -178,7 +161,7 @@ if __name__ == "__main__":
   print("FASE 1 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
   #getTweets("#traficogt","2020-04-06",50)
   print('FASE 2 --> AGREGANDO COORDENADAS AL QUERY')
-  fase2("2020-04-06")  
-  #print(loc)
+  #fase2("2020-04-06")  
   print('FASE 3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION')
+#select fase2.id, municipios.point_x, municipios.point_y from fase2, municipios where municipios.id = fase2.municipios
 

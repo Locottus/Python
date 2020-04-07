@@ -35,7 +35,9 @@ create table public.fase1(
 	fecha timestamp without time zone DEFAULT now(),
 	twitjson json not null ,
 	twitstring text not null ,
-	origen text null
+	origen text null,
+	municipio numeric null default 0,
+	sos numeric null default 0
 )
 
 '''
@@ -120,18 +122,20 @@ def convUTF8(cadena):
 #****************************FASE 2******************************************
 
 '''
-create table public.fase2(
-	id SERIAL PRIMARY KEY,
-	fecha timestamp without time zone DEFAULT now(),
-	fase1 numeric not null ,
-	municipios numeric null
+
+create table public.sos(
+        id SERIAL PRIMARY KEY,
+	encabezado text not null,
+	
 );
 
-create table public.categorias(
+create table public.sosdetalle(
         id SERIAL PRIMARY KEY,
-	fecha timestamp without time zone DEFAULT now(),
-	twitstring text not null ,
+        sos numeric not null,
+	detalle text not null,
+	
 );
+
 
 '''
 
@@ -143,11 +147,12 @@ def getLocation():
     cursor.execute("select cast(id as text), pais,departamen_1,municipi_1,cast(point_x as text),cast(point_y as text) from public.municipios")
     l = json.dumps(cursor.fetchall(),indent = 2)
     conn.close()
-    #print(l)  
     return l
 
 def fase2(fecha):
-    query = "insert into public.fase2 ( municipios , fase1 )  select m1.id,fase1.id   from municipios m1, municipios m2, fase1 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
+    #query = "insert into public.fase2 ( municipios , fase1 )  select distinct m1.id,fase1.id   from municipios m1, municipios m2, fase1 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
+    query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
+    
     print(query)
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
@@ -159,9 +164,9 @@ def fase2(fecha):
 
 if __name__ == "__main__":
   print("FASE 1 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
-  #getTweets("#traficogt","2020-04-06",50)
+  #getTweets("#traficogt","2020-04-07",500)
   print('FASE 2 --> AGREGANDO COORDENADAS AL QUERY')
-  #fase2("2020-04-06")  
+  #fase2("2020-04-07")  
   print('FASE 3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION')
 #select fase2.id, municipios.point_x, municipios.point_y from fase2, municipios where municipios.id = fase2.municipios
 

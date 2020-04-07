@@ -3,17 +3,12 @@ import tweepy,psycopg2,os,json,datetime
 '''
 API key:
 bCgXMvHfVr1f86jrcwJSIbfyU
-
 API secret key:
 UUYjGwM63n6UvZMPTmfZG0yUq5eDm2PE5747F0xht71pgr2g8v
-
 access token
 1432847989-W3qw9szAWWP0VxsPpEsvVZX6igJjrVJzUZrrgYY
-
-
 access token secret
 332CPmsifvklzEK33F99flSAde5zz71fCiaz4V1P6qYIs
-
 '''
 #connstr para bd
 conn_string = "host='localhost' dbname='sosagua' user='postgres' password='Guatemala1'"
@@ -30,6 +25,10 @@ cfg = {
 #****************************************FASE 1 *******************************************
 
 '''
+
+update pg_database set encoding=8 where datname='sosagua';
+update pg_database set encoding = pg_char_to_encoding('UTF8') where datname = 'sosagua'
+	
 create table public.fase1(
 	id SERIAL PRIMARY KEY,
 	fecha timestamp without time zone DEFAULT now(),
@@ -104,8 +103,8 @@ def getTweets(search_words,date_since,number):
                     "name":            item.user.name,
                     "screen_name":     item.user.screen_name,
                     "retweet_count":   item.retweet_count,
-                    "text":            item.text,
-                    "location":        item.user.location,
+                    "text":            convUTF8(item.text),
+                    "location":        convUTF8(item.user.location),
                     "coordinates":     str(item.coordinates),
                     "geo_enabled":     str(item.user.geo_enabled),
                     "geo":             str(item.geo),
@@ -113,7 +112,7 @@ def getTweets(search_words,date_since,number):
                     "favorite_count": item.favorite_count,
                     "hashtags":        item.entities['hashtags'],
                     "status_count":    item.user.statuses_count,
-                    "location":        str(item.place),
+                    "place":           convUTF8(item.place),
                     "source":          item.source
                 }
     #print(mined)
@@ -124,23 +123,62 @@ def getToday():
     from datetime import date
     return date.today()
 
+def convUTF8(cadena):
+    return str(cadena).replace("á","a").replace("é","e").replace("í","i").replace("ó","o").replace("ú","u").replace("ñ","n").replace("Á","A").replace("É","E").replace("Í","I").replace("Ó","O").replace("Ú","U").replace("Ñ","Ñ")
+
 
 
 #****************************FASE 2******************************************
 
+'''
+create table public.fase2(
+	id SERIAL PRIMARY KEY,
+	fecha timestamp without time zone DEFAULT now(),
+	fase1 numeric not null ,
+	municipios numeric null
+);
+
+create table public.categorias(
+        id SERIAL PRIMARY KEY,
+	fecha timestamp without time zone DEFAULT now(),
+	twitstring text not null ,
+);
+
+'''
 
 
-
-
-
-
-
-
+def getLocation():
+    from psycopg2.extras import RealDictCursor
+    conn = psycopg2.connect(conn_string)
+    cursor = conn.cursor(cursor_factory=RealDictCursor)
+    cursor.execute("select cast(id as text), pais,departamen_1,municipi_1,cast(point_x as text),cast(point_y as text) from public.municipios")
+    l = json.dumps(cursor.fetchall(),indent = 2)
+    conn.close()
+    #print(l)  
+    return l
+'''
+select m1.id,fase1.id
+from municipios m1, municipios m2, fase1 
+where m1.id = m2.id
+and fase1.twitstring like '%' || m1.departamen_1 || '%'
+and fase1.twitstring like '%' || m2.municipi_1 || '%'
+'''
+def fase2(fecha):
+    query = "insert into public.fase2 ( municipios , fase1 )  select m1.id,fase1.id   from municipios m1, municipios m2, fase1 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
+    print(query)
+    conn = psycopg2.connect(conn_string)
+    cursor = conn.cursor()
+    cursor.execute(query)
+    conn.commit()
+    conn.close()
+    print("terminada fase 2")
+    
 
 if __name__ == "__main__":
-  #sendTwitt()
   print("FASE 1 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
-  #getTweets("#sosagua",getToday(),100)
+  #getTweets("#traficogt","2020-04-06",50)
   print('FASE 2 --> AGREGANDO COORDENADAS AL QUERY')
+  fase2("2020-04-06")  
+  #print(loc)
   print('FASE 3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION')
-  
+

@@ -1,4 +1,4 @@
-import tweepy,psycopg2,os,json,datetime
+import tweepy, psycopg2, os, json, datetime
 
 '''
 HERLICH STEVEN GONZALEZ ZAMBRANO 2020 --> EN CUARENTENA MUNDIAL
@@ -37,7 +37,16 @@ create table public.fase1(
 	twitstring text not null ,
 	origen text null,
 	municipio numeric null default 0,
-	sos numeric null default 0
+	necesidad numeric null default 1
+)
+
+
+create table cubo1(
+	municipio numeric not null,
+	necesidad numeric not null,
+	mes	text	not null,
+	ano text	not null,
+	contador numeric not null
 )
 
 '''
@@ -123,16 +132,15 @@ def convUTF8(cadena):
 
 '''
 
-create table public.sos(
+create table public.necesidad(
         id SERIAL PRIMARY KEY,
 	encabezado text not null,
 	
 );
 
-create table public.sosdetalle(
-        id SERIAL PRIMARY KEY,
-        sos numeric not null,
-	detalle text not null,
+create table public.necesidaddetalle(
+        necesidad numeric,
+        detalle text not null,
 	
 );
 
@@ -149,10 +157,21 @@ def getLocation():
     conn.close()
     return l
 
+
+def ejecutaComandoPsql(query):
+    #query = "insert into public.fase2 ( municipios , fase1 )  select distinct m1.id,fase1.id   from municipios m1, municipios m2, fase1 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
+    #query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
+    print(query)
+    conn = psycopg2.connect(conn_string)
+    cursor = conn.cursor()
+    cursor.execute(query)
+    conn.commit()
+    conn.close()
+
+
+'''
 def fase2(fecha):
     #query = "insert into public.fase2 ( municipios , fase1 )  select distinct m1.id,fase1.id   from municipios m1, municipios m2, fase1 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
-    query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
-    
     print(query)
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
@@ -160,13 +179,21 @@ def fase2(fecha):
     conn.commit()
     conn.close()
     print("terminada fase 2")
-    
+'''    
 
 if __name__ == "__main__":
-  print("FASE 1 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
-  #getTweets("#traficogt","2020-04-07",500)
-  print('FASE 2 --> AGREGANDO COORDENADAS AL QUERY')
-  #fase2("2020-04-07")  
-  print('FASE 3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION')
+  fecha = getToday()
+  print(fecha)
+  print("FASE 1.0 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
+  #getTweets("#traficogt","2020-04-07",50000)
+  print('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
+  query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + str(fecha) + " 00:00:00' "
+  #ejecutaComandoPsql(query)
+  print('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION --> CREANDO CUBO 1')
+  query = "truncate table cubo1"
+  ejecutaComandoPsql(query)
+  query = "insert into cubo1 (municipio,necesidad,mes,ano,contador) select municipio, necesidad, extract(MONTH from FECHA),extract (YEAR from FECHA), count(*) from fase1 group by municipio, necesidad,  extract(MONTH from FECHA), extract(YEAR from FECHA)"
+  ejecutaComandoPsql(query)
+  
 #select fase2.id, municipios.point_x, municipios.point_y from fase2, municipios where municipios.id = fase2.municipios
 

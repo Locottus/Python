@@ -181,11 +181,18 @@ def fase2(fecha):
     print("terminada fase 2")
 '''    
 
+#ADD HERE NEW HASHTAGS
+hashtags = ["#AGUAGT", "#SOSAGUAGT"]
+
 if __name__ == "__main__":
   fecha = getToday()
   print(fecha)
   print("FASE 1.0 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
-  getTweets("#SOSAGUA",str(fecha),50000)
+  
+  for x in hashtags:
+      print(x)
+      getTweets(x,str(fecha),50000)
+
   print('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
   query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + str(fecha) + " 00:00:00' "
   ejecutaComandoPsql(query)

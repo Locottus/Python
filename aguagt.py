@@ -208,7 +208,7 @@ if __name__ == "__main__":
   for x in hashtags:
       print(x)
       write(x)
-#      getTweets(x,str(fecha),nTwits)
+      getTweets(x,str(fecha),nTwits)
 
 
 
@@ -230,6 +230,8 @@ if __name__ == "__main__":
   ejecutaComandoPsql(query)
 
 #TODO QUERY NECESIDAD
+  query = "update fase1  set necesidad = s1.necesidad from  sinonimos s1 where lower(fase1.twitstring) like '%' || lower(s1.sinonimo) || '%'  "
+  ejecutaComandoPsql(query)#TODO where current month and current year
   
   query = "update fase1 set necesidad = 0 where necesidad is null"
   ejecutaComandoPsql(query)
@@ -237,6 +239,8 @@ if __name__ == "__main__":
   ejecutaComandoPsql(query)
   query = "insert into cubo1 (municipio,necesidad,mes,ano,contador) select municipio, necesidad, extract(MONTH from FECHA),extract (YEAR from FECHA), count(*) from fase1 group by municipio, necesidad,  extract(MONTH from FECHA), extract(YEAR from FECHA)"
   ejecutaComandoPsql(query)#TODO where current month and current year
+
+  
   
   print("proceso terminado")
   write("proceso terminado")

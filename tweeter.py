@@ -1,4 +1,12 @@
-import tweepy, psycopg2, os, json, datetime
+import tweepy, psycopg2, os, json, datetime,sys
+
+f = open("sosagua.txt", "a")
+#connstr para bd
+#dev str
+conn_string = "host='localhost' dbname='sosagua' user='postgres' password='Guatemala1'"
+
+#produccion str
+#conn_string = "host='localhost' dbname='sosagua' user='postgres' password='postgres2020!Incyt'"
 
 '''
 HERLICH STEVEN GONZALEZ ZAMBRANO 2020 --> EN CUARENTENA MUNDIAL
@@ -11,10 +19,8 @@ access token
 access token secret
 332CPmsifvklzEK33F99flSAde5zz71fCiaz4V1P6qYIs
 '''
-#connstr para bd
-conn_string = "host='localhost' dbname='sosagua' user='postgres' password='Guatemala1'"
 
-
+nTwits = 50000
 # estos valores se dan al habilitar el servicio de tweeter de la cuenta.
 cfg = { 
   "consumer_key"        : "bCgXMvHfVr1f86jrcwJSIbfyU",
@@ -119,9 +125,11 @@ def getTweets(search_words,date_since,number):
     #minedS = minedS.replace("'",'"')
     insertaTwitt(str(mined).replace("'",'"'),s)
 
-def getToday():
+def getProcessDate():
     from datetime import date
-    return date.today()
+    today = date.today()
+    yesterday = today - datetime.timedelta(days=1)
+    return yesterday
 
 def convUTF8(cadena):
     return str(cadena).replace("á","a").replace("é","e").replace("í","i").replace("ó","o").replace("ú","u").replace("ñ","n").replace("Á","A").replace("É","E").replace("Í","I").replace("Ó","O").replace("Ú","U").replace("Ñ","Ñ")
@@ -134,20 +142,23 @@ def convUTF8(cadena):
 
 create table public.necesidad(
         id SERIAL PRIMARY KEY,
-	descripcion text not null,
+	descripcion text not null
 	
 );
 
-create table public.necesidaddetalle(
+create table public.sinonimos(
         necesidad numeric,
-        detalle text not null,
+        sinonimo text not null unique
 	
 );
+
 
 
 '''
 
-
+def write(cadena):
+    f.write(str(cadena) + '\n')
+    
 def getLocation():
     from psycopg2.extras import RealDictCursor
     conn = psycopg2.connect(conn_string)
@@ -182,21 +193,34 @@ def fase2(fecha):
 '''    
 
 #ADD HERE NEW HASHTAGS
-hashtags = ["#AGUAGT", "#SOSAGUAGT"]
+hashtags = ["#AGUAGT", "#SOSAGUAGT", "#SINAGUA"]
 
 if __name__ == "__main__":
-  fecha = getToday()
+  write("*************************************************************")
+  fecha = getProcessDate()
   print(fecha)
+  write(fecha)
   print("FASE 1.0 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
   
   for x in hashtags:
       print(x)
-      getTweets(x,str(fecha),50000)
+      write(x)
+#      getTweets(x,str(fecha),nTwits)
 
+
+
+  print("proceso terminado")
+  write("proceso terminado")
+  f.close()
+'''
   print('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
+  write('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
+
   query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + str(fecha) + " 00:00:00' "
   ejecutaComandoPsql(query)
   print('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION --> CREANDO CUBO 1')
+  write('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION --> CREANDO CUBO 1')
+
   query = "update fase1 set municipio = 0 where municipio is null"
   ejecutaComandoPsql(query)
   query = "update fase1 set necesidad = 0 where necesidad is null"
@@ -206,3 +230,8 @@ if __name__ == "__main__":
   query = "insert into cubo1 (municipio,necesidad,mes,ano,contador) select municipio, necesidad, extract(MONTH from FECHA),extract (YEAR from FECHA), count(*) from fase1 group by municipio, necesidad,  extract(MONTH from FECHA), extract(YEAR from FECHA)"
   ejecutaComandoPsql(query)#TODO where current month and current year
   
+'''
+
+
+
+

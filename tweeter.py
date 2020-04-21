@@ -196,7 +196,7 @@ def fase2(fecha):
 #ADD HERE NEW HASHTAGS
 hashtags = ["#AGUAGT", "#SOSAGUAGT", "#SINAGUA"]
 #hashtags = ["#TRANSITOGT"]
-nTwits = 50000
+nTwits = 5000
 
 if __name__ == "__main__":
   write("*************************************************************")
@@ -216,13 +216,21 @@ if __name__ == "__main__":
   print('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
   write('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
 
-  query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + str(fecha) + " 00:00:00' "
+  #query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and lower(fase1.twitstring) like '%' || lower(m1.departamen_1) || '%' and lower(fase1.twitstring) like '%' || lower(m2.municipi_1) || '%' and fase1.fecha > '" + str(fecha) + " 00:00:00' "
+  query = "update fase1  set municipio = m1.id from  municipios m1 where lower(fase1.twitstring) like '%' || lower(m1.departamen_1) || '%' and fase1.municipio = 0  and fase1.fecha > '" + str(fecha) + " 00:00:00' "
   ejecutaComandoPsql(query)
+
+  query = "update fase1  set municipio = m1.id from  municipios m1 where lower(fase1.twitstring) like '%' || lower(m1.municipi_1) || '%'  and fase1.municipio = 0  and fase1.fecha > '" + str(fecha) + " 00:00:00' "
+  ejecutaComandoPsql(query)
+
   print('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION --> CREANDO CUBO 1')
   write('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION --> CREANDO CUBO 1')
 
   query = "update fase1 set municipio = 0 where municipio is null"
   ejecutaComandoPsql(query)
+
+#TODO QUERY NECESIDAD
+  
   query = "update fase1 set necesidad = 0 where necesidad is null"
   ejecutaComandoPsql(query)
   query = "delete from cubo1"#TODO where current month and current year

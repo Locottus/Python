@@ -20,7 +20,6 @@ access token secret
 332CPmsifvklzEK33F99flSAde5zz71fCiaz4V1P6qYIs
 '''
 
-nTwits = 50000
 # estos valores se dan al habilitar el servicio de tweeter de la cuenta.
 cfg = { 
   "consumer_key"        : "bCgXMvHfVr1f86jrcwJSIbfyU",
@@ -132,8 +131,10 @@ def getProcessDate():
     return yesterday
 
 def convUTF8(cadena):
-    return str(cadena).replace("á","a").replace("é","e").replace("í","i").replace("ó","o").replace("ú","u").replace("ñ","n").replace("Á","A").replace("É","E").replace("Í","I").replace("Ó","O").replace("Ú","U").replace("Ñ","Ñ")
-
+    try:
+        return str(cadena).replace("á","a").replace("é","e").replace("í","i").replace("ó","o").replace("ú","u").replace("ñ","n").replace("Á","A").replace("É","E").replace("Í","I").replace("Ó","O").replace("Ú","U").replace("Ñ","Ñ")
+    except:
+        return cadena
 
 
 #****************************FASE 2******************************************
@@ -194,6 +195,8 @@ def fase2(fecha):
 
 #ADD HERE NEW HASHTAGS
 hashtags = ["#AGUAGT", "#SOSAGUAGT", "#SINAGUA"]
+#hashtags = ["#TRANSITOGT"]
+nTwits = 50000
 
 if __name__ == "__main__":
   write("*************************************************************")
@@ -209,10 +212,7 @@ if __name__ == "__main__":
 
 
 
-  print("proceso terminado")
-  write("proceso terminado")
-  f.close()
-'''
+
   print('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
   write('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
 
@@ -230,8 +230,9 @@ if __name__ == "__main__":
   query = "insert into cubo1 (municipio,necesidad,mes,ano,contador) select municipio, necesidad, extract(MONTH from FECHA),extract (YEAR from FECHA), count(*) from fase1 group by municipio, necesidad,  extract(MONTH from FECHA), extract(YEAR from FECHA)"
   ejecutaComandoPsql(query)#TODO where current month and current year
   
-'''
-
+  print("proceso terminado")
+  write("proceso terminado")
+  f.close()
 
 
 

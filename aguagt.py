@@ -3,10 +3,10 @@ import tweepy, psycopg2, os, json, datetime,sys
 f = open("sosagua.txt", "a")
 #connstr para bd
 #dev str
-#conn_string = "host='localhost' dbname='sosagua' user='postgres' password='Guatemala1'"
+conn_string = "host='localhost' dbname='sosagua' user='postgres' password='Guatemala1'"
 
 #produccion str
-conn_string = "host='localhost' dbname='sosagua' user='postgres' password='postgres2020!Incyt'"
+#conn_string = "host='localhost' dbname='sosagua' user='postgres' password='postgres2020!Incyt'"
 
 '''
 HERLICH STEVEN GONZALEZ ZAMBRANO 2020 --> EN CUARENTENA MUNDIAL
@@ -57,13 +57,15 @@ create table cubo1(
 '''
 
 def insertaTwitt(tjson,tstr):
-    conn = psycopg2.connect(conn_string)
-    cursor = conn.cursor()
-    print(tjson)
-    cursor.execute(" insert into fase1 (fecha,twitjson,twitstring,origen) values (now() - INTERVAL '1 DAY','" + json.dumps(tjson) + "','" + str(tstr).replace("'",'"') + "','Twitter')")
-    conn.commit()
-    conn.close()
-
+    try:
+        conn = psycopg2.connect(conn_string)
+        cursor = conn.cursor()
+        print(tjson)
+        cursor.execute(" insert into fase1 (fecha,twitjson,twitstring,origen) values (now() - INTERVAL '1 DAY','" + json.dumps(tjson) + "','" + str(tstr).replace("'",'"') + "','Twitter')")
+        conn.commit()
+        conn.close()
+    except:
+        print("error en insertaTwitt")
 
 
 #instalar el paquete de la siguiente forma:  pip install tweepi
@@ -73,9 +75,13 @@ def get_api(cfg):
   return tweepy.API(auth)
 
 def sendTwitt():
-  api = get_api(cfg)
-  tweet = "Hello, world! msg from an py app"
-  status = api.update_status(status=tweet) 
+  try:
+      api = get_api(cfg)
+      tweet = "Hello, world! msg from an py app"
+      status = api.update_status(status=tweet) 
+  except:
+      print("twitt not send")
+
 
 class msg:
   def __init__(self, created_at, id, id_str, text, entities, metadata, source, user):
@@ -90,49 +96,57 @@ class msg:
   
 
 def getTweets(search_words,date_since,number):
-  api = get_api(cfg)
-  #"#COVID2019"
-  tweets = tweepy.Cursor(api.search,
-              q=search_words,
-              lang="es",
-              since=date_since).items(number)
-  # Iterate and print tweets
-  
-  for item in tweets:
-    try:
-        s = item#este es el string
-        #m = msg(tweet.created_at,tweet.id,tweet.id_str,tweet.text,tweet.entities,tweet.metadata,tweet.source,tweet.user)#este sera el json
-        #json.dumps(m)
-        mined = {
-                        "id":              item.id,
-                        "name":            item.user.name,
-                        "screen_name":     item.user.screen_name,
-                        "retweet_count":   item.retweet_count,
-                        "text":            convUTF8(item.text),
-                        "location":        convUTF8(item.user.location),
-                        "coordinates":     str(item.coordinates),
-                        "geo_enabled":     str(item.user.geo_enabled),
-                        "geo":             str(item.geo),
-                        "created_at":      str(item.created_at),
-                        "favorite_count": item.favorite_count,
-                        "hashtags":        item.entities['hashtags'],
-                        "status_count":    item.user.statuses_count,
-                        "place":           convUTF8(item.place),
-                        "source":          item.source
-                    }
-        #print(mined)
-        #minedS = minedS.replace("'",'"')
-        insertaTwitt(str(mined).replace("'",'"'),s)
-    except:
-        print("un json viene malformado")
+  try:
+      api = get_api(cfg)
+      #"#COVID2019"
+      tweets = tweepy.Cursor(api.search,
+                  q=search_words,
+                  lang="es",
+                  since=date_since).items(number)
+      # Iterate and print tweets
+      
+      for item in tweets:
+        try:
+            s = item#este es el string
+            #m = msg(tweet.created_at,tweet.id,tweet.id_str,tweet.text,tweet.entities,tweet.metadata,tweet.source,tweet.user)#este sera el json
+            #json.dumps(m)
+            mined = {
+                            "id":              item.id,
+                            "name":            item.user.name,
+                            "screen_name":     item.user.screen_name,
+                            "retweet_count":   item.retweet_count,
+                            "text":            convUTF8(item.text),
+                            "location":        convUTF8(item.user.location),
+                            "coordinates":     str(item.coordinates),
+                            "geo_enabled":     str(item.user.geo_enabled),
+                            "geo":             str(item.geo),
+                            "created_at":      str(item.created_at),
+                            "favorite_count": item.favorite_count,
+                            "hashtags":        item.entities['hashtags'],
+                            "status_count":    item.user.statuses_count,
+                            "place":           convUTF8(item.place),
+                            "source":          item.source
+                        }
+            #print(mined)
+            #minedS = minedS.replace("'",'"')
+            insertaTwitt(str(mined).replace("'",'"'),s)
+        except:
+            print("un json viene malformado")
+
+  except:
+      print("getTweets error")
 
 
 def getProcessDate():
-    from datetime import date
-    today = date.today()
-    yesterday = today - datetime.timedelta(days=1)
-    return yesterday
+    try:
 
+        from datetime import date
+        today = date.today()
+        yesterday = today - datetime.timedelta(days=1)
+        return yesterday
+    except:
+        print("error en getProcessDate")
+        
 def convUTF8(cadena):
     try:
         return str(cadena).replace("á","a").replace("é","e").replace("í","i").replace("ó","o").replace("ú","u").replace("ñ","n").replace("Á","A").replace("É","E").replace("Í","I").replace("Ó","O").replace("Ú","U").replace("Ñ","Ñ")
@@ -161,45 +175,42 @@ create table public.sinonimos(
 '''
 
 def write(cadena):
-    f.write(str(cadena) + '\n')
-    
-def getLocation():
-    from psycopg2.extras import RealDictCursor
-    conn = psycopg2.connect(conn_string)
-    cursor = conn.cursor(cursor_factory=RealDictCursor)
-    cursor.execute("select cast(id as text), pais,departamen_1,municipi_1,cast(point_x as text),cast(point_y as text) from public.municipios")
-    l = json.dumps(cursor.fetchall(),indent = 2)
-    conn.close()
-    return l
+    try:
+        f.write(str(cadena) + '\n')
+    except:
+        print("could not write")
 
+        
+def getLocation():
+    try:
+        from psycopg2.extras import RealDictCursor
+        conn = psycopg2.connect(conn_string)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute("select cast(id as text), pais,departamen_1,municipi_1,cast(point_x as text),cast(point_y as text) from public.municipios")
+        l = json.dumps(cursor.fetchall(),indent = 2)
+        conn.close()
+        return l
+    except:
+        print("error en getLocation")
 
 def ejecutaComandoPsql(query):
-    #query = "insert into public.fase2 ( municipios , fase1 )  select distinct m1.id,fase1.id   from municipios m1, municipios m2, fase1 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
-    #query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
-    print(query)
-    conn = psycopg2.connect(conn_string)
-    cursor = conn.cursor()
-    cursor.execute(query)
-    conn.commit()
-    conn.close()
+    try:
+        #query = "insert into public.fase2 ( municipios , fase1 )  select distinct m1.id,fase1.id   from municipios m1, municipios m2, fase1 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
+        #query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
+        print(query)
+        conn = psycopg2.connect(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(query)
+        conn.commit()
+        conn.close()
+    except:
+        print("error en ejecutar comando psql")
 
-
-'''
-def fase2(fecha):
-    #query = "insert into public.fase2 ( municipios , fase1 )  select distinct m1.id,fase1.id   from municipios m1, municipios m2, fase1 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
-    print(query)
-    conn = psycopg2.connect(conn_string)
-    cursor = conn.cursor()
-    cursor.execute(query)
-    conn.commit()
-    conn.close()
-    print("terminada fase 2")
-'''    
 
 #ADD HERE NEW HASHTAGS
 hashtags = ["#AGUAGT", "#SOSAGUAGT", "#SINAGUA"]
 #hashtags = ["#TRANSITOGT"]
-nTwits = 500000
+nTwits = 50000
 
 if __name__ == "__main__":
   write("*************************************************************")
@@ -211,7 +222,10 @@ if __name__ == "__main__":
   for x in hashtags:
       print(x)
       write(x)
-      getTweets(x,str(fecha),nTwits)
+      try:
+          getTweets(x,str(fecha),nTwits)
+      except:
+          print("error en for de los hashtags, se procede a las fases")
 
 
 

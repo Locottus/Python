@@ -125,6 +125,8 @@ def getTweets(search_words,date_since,number):
         insertaTwitt(str(mined).replace("'",'"'),s)
     except:
         print("un json viene malformado")
+
+
 def getProcessDate():
     from datetime import date
     today = date.today()
@@ -197,7 +199,7 @@ def fase2(fecha):
 #ADD HERE NEW HASHTAGS
 hashtags = ["#AGUAGT", "#SOSAGUAGT", "#SINAGUA"]
 #hashtags = ["#TRANSITOGT"]
-nTwits = 50000
+nTwits = 500000
 
 if __name__ == "__main__":
   write("*************************************************************")

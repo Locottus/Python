@@ -60,8 +60,7 @@ def insertaTwitt(tjson,tstr):
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     print(tjson)
-#    cursor.execute(""" delete from test where campo1 = 'David'  """)
-    cursor.execute(" insert into fase1 (twitjson,twitstring,origen) values ('" + json.dumps(tjson) + "','" + str(tstr).replace("'",'"') + "','Twitter')")
+    cursor.execute(" insert into fase1 (fecha,twitjson,twitstring,origen) values (now() - INTERVAL '1 DAY','" + json.dumps(tjson) + "','" + str(tstr).replace("'",'"') + "','Twitter')")
     conn.commit()
     conn.close()
 

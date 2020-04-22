@@ -3,10 +3,10 @@ import tweepy, psycopg2, os, json, datetime,sys
 f = open("sosagua.txt", "a")
 #connstr para bd
 #dev str
-conn_string = "host='localhost' dbname='sosagua' user='postgres' password='Guatemala1'"
+#conn_string = "host='localhost' dbname='sosagua' user='postgres' password='Guatemala1'"
 
 #produccion str
-#conn_string = "host='localhost' dbname='sosagua' user='postgres' password='postgres2020!Incyt'"
+conn_string = "host='localhost' dbname='sosagua' user='postgres' password='postgres2020!Incyt'"
 
 '''
 HERLICH STEVEN GONZALEZ ZAMBRANO 2020 --> EN CUARENTENA MUNDIAL
@@ -99,30 +99,32 @@ def getTweets(search_words,date_since,number):
   # Iterate and print tweets
   
   for item in tweets:
-    s = item#este es el string
-    #m = msg(tweet.created_at,tweet.id,tweet.id_str,tweet.text,tweet.entities,tweet.metadata,tweet.source,tweet.user)#este sera el json
-    #json.dumps(m)
-    mined = {
-                    "id":              item.id,
-                    "name":            item.user.name,
-                    "screen_name":     item.user.screen_name,
-                    "retweet_count":   item.retweet_count,
-                    "text":            convUTF8(item.text),
-                    "location":        convUTF8(item.user.location),
-                    "coordinates":     str(item.coordinates),
-                    "geo_enabled":     str(item.user.geo_enabled),
-                    "geo":             str(item.geo),
-                    "created_at":      str(item.created_at),
-                    "favorite_count": item.favorite_count,
-                    "hashtags":        item.entities['hashtags'],
-                    "status_count":    item.user.statuses_count,
-                    "place":           convUTF8(item.place),
-                    "source":          item.source
-                }
-    #print(mined)
-    #minedS = minedS.replace("'",'"')
-    insertaTwitt(str(mined).replace("'",'"'),s)
-
+    try:
+        s = item#este es el string
+        #m = msg(tweet.created_at,tweet.id,tweet.id_str,tweet.text,tweet.entities,tweet.metadata,tweet.source,tweet.user)#este sera el json
+        #json.dumps(m)
+        mined = {
+                        "id":              item.id,
+                        "name":            item.user.name,
+                        "screen_name":     item.user.screen_name,
+                        "retweet_count":   item.retweet_count,
+                        "text":            convUTF8(item.text),
+                        "location":        convUTF8(item.user.location),
+                        "coordinates":     str(item.coordinates),
+                        "geo_enabled":     str(item.user.geo_enabled),
+                        "geo":             str(item.geo),
+                        "created_at":      str(item.created_at),
+                        "favorite_count": item.favorite_count,
+                        "hashtags":        item.entities['hashtags'],
+                        "status_count":    item.user.statuses_count,
+                        "place":           convUTF8(item.place),
+                        "source":          item.source
+                    }
+        #print(mined)
+        #minedS = minedS.replace("'",'"')
+        insertaTwitt(str(mined).replace("'",'"'),s)
+    except:
+        print("un json viene malformado")
 def getProcessDate():
     from datetime import date
     today = date.today()
@@ -195,7 +197,7 @@ def fase2(fecha):
 #ADD HERE NEW HASHTAGS
 hashtags = ["#AGUAGT", "#SOSAGUAGT", "#SINAGUA"]
 #hashtags = ["#TRANSITOGT"]
-nTwits = 5000
+nTwits = 50000
 
 if __name__ == "__main__":
   write("*************************************************************")
@@ -239,8 +241,6 @@ if __name__ == "__main__":
   query = "insert into cubo1 (municipio,necesidad,mes,ano,contador) select municipio, necesidad, extract(MONTH from FECHA),extract (YEAR from FECHA), count(*) from fase1 group by municipio, necesidad,  extract(MONTH from FECHA), extract(YEAR from FECHA)"
   ejecutaComandoPsql(query)#TODO where current month and current year
 
-  
-  
   print("proceso terminado")
   write("proceso terminado")
   f.close()

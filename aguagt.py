@@ -3,10 +3,10 @@ import tweepy, psycopg2, os, json, datetime,sys
 f = open("sosagua.txt", "a")
 #connstr para bd
 #dev str
-conn_string = "host='localhost' dbname='sosagua' user='postgres' password='Guatemala1'"
+#conn_string = "host='localhost' dbname='sosagua' user='postgres' password='Guatemala1'"
 
 #produccion str
-#conn_string = "host='localhost' dbname='sosagua' user='postgres' password='postgres2020!Incyt'"
+conn_string = "host='localhost' dbname='sosagua' user='postgres' password='postgres2020!Incyt'"
 
 '''
 HERLICH STEVEN GONZALEZ ZAMBRANO 2020 --> EN CUARENTENA MUNDIAL
@@ -243,7 +243,7 @@ if __name__ == "__main__":
   print('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION --> CREANDO CUBO 1')
   write('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION --> CREANDO CUBO 1')
 
-  query = "update fase1 set municipio = 0 where municipio is null"
+  query = "delete from fase1 where municipio is null"
   ejecutaComandoPsql(query)
 
 #TODO QUERY NECESIDAD

@@ -36,7 +36,6 @@ update pg_database set encoding=8 where datname='sosagua';
 update pg_database set encoding = pg_char_to_encoding('UTF8') where datname = 'sosagua'
 	
 create table public.fase1(
-	id SERIAL PRIMARY KEY,
 	fecha timestamp without time zone DEFAULT now(),
 	twitjson json not null ,
 	twitstring text not null ,
@@ -98,7 +97,6 @@ class msg:
 def getTweets(search_words,date_since,number):
   try:
       api = get_api(cfg)
-      #"#COVID2019"
       tweets = tweepy.Cursor(api.search,
                   q=search_words,
                   lang="es",
@@ -176,6 +174,7 @@ create table public.sinonimos(
 
 def write(cadena):
     try:
+        print(cadena)
         f.write(str(cadena) + '\n')
     except:
         print("could not write")
@@ -195,9 +194,7 @@ def getLocation():
 
 def ejecutaComandoPsql(query):
     try:
-        #query = "insert into public.fase2 ( municipios , fase1 )  select distinct m1.id,fase1.id   from municipios m1, municipios m2, fase1 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
-        #query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and fase1.twitstring like '%' || m1.departamen_1 || '%' and fase1.twitstring like '%' || m2.municipi_1 || '%' and fase1.fecha > '" + fecha + " 00:00:00' "
-        print(query)
+        #print(query)
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute(query)
@@ -209,13 +206,11 @@ def ejecutaComandoPsql(query):
 
 #ADD HERE NEW HASHTAGS
 hashtags = ["#AGUAGT", "#SOSAGUAGT", "#SINAGUA"]
-#hashtags = ["#TRANSITOGT"]
 nTwits = 50000
 
 if __name__ == "__main__":
   write("*************************************************************")
   fecha = getProcessDate()
-  print(fecha)
   write(fecha)
   print("FASE 1.0 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
   
@@ -228,36 +223,32 @@ if __name__ == "__main__":
           print("error en for de los hashtags, se procede a las fases")
 
 
-
-
-  print('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
   write('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
-
-  #query = "update fase1  set municipio = m1.id   from municipios m1, municipios m2 where m1.id = m2.id  and lower(fase1.twitstring) like '%' || lower(m1.departamen_1) || '%' and lower(fase1.twitstring) like '%' || lower(m2.municipi_1) || '%' and fase1.fecha > '" + str(fecha) + " 00:00:00' "
   query = "update fase1  set municipio = m1.id from  municipios m1 where lower(fase1.twitstring) like '%' || lower(m1.departamen_1) || '%' and fase1.municipio = 0  and fase1.fecha > '" + str(fecha) + " 00:00:00' "
   ejecutaComandoPsql(query)
+
+  write('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION')
 
   query = "update fase1  set municipio = m1.id from  municipios m1 where lower(fase1.twitstring) like '%' || lower(m1.municipi_1) || '%'  and fase1.municipio = 0  and fase1.fecha > '" + str(fecha) + " 00:00:00' "
   ejecutaComandoPsql(query)
 
-  print('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION --> CREANDO CUBO 1')
-  write('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION --> CREANDO CUBO 1')
-
+  write('FASE 1.4 --> borrando datos del mes y ano actual del cubo para actualizar cubo1')
   query = "delete from fase1 where municipio is null"
   ejecutaComandoPsql(query)
 
-#TODO QUERY NECESIDAD
-  query = "update fase1  set necesidad = s1.necesidad from  sinonimos s1 where lower(fase1.twitstring) like '%' || lower(s1.sinonimo) || '%'  "
-  ejecutaComandoPsql(query)#TODO where current month and current year
-  
-  query = "update fase1 set necesidad = 0 where necesidad is null"
-  ejecutaComandoPsql(query)
-  query = "delete from cubo1"#TODO where current month and current year
-  ejecutaComandoPsql(query)
-  query = "insert into cubo1 (municipio,necesidad,mes,ano,contador) select municipio, necesidad, extract(MONTH from FECHA),extract (YEAR from FECHA), count(*) from fase1 group by municipio, necesidad,  extract(MONTH from FECHA), extract(YEAR from FECHA)"
-  ejecutaComandoPsql(query)#TODO where current month and current year
 
-  print("proceso terminado")
+  write('FASE 1.5 --> actualizando necesidades a tabla fase1')
+  query = "update fase1  set necesidad = s1.necesidad from  sinonimos s1 where lower(fase1.twitstring) like '%' || lower(s1.sinonimo) || '%'  and extract(MONTH from FECHA) = extract(MONTH from now()) and extract(YEAR from FECHA) = extract(YEAR from now())"
+  ejecutaComandoPsql(query)
+
+  write('FASE 1.5 --> borrando datos del mes y ano actual de tabla cubo1')
+  query = "delete from cubo1 where cast (mes as numeric) = extract(MONTH from now()) and cast (ano as numeric) = extract(YEAR from now()) "
+  ejecutaComandoPsql(query)
+
+  write('FASE 1.6 --> borrando datos del mes y ano actual de tabla cubo1')
+  query = "insert into cubo1 (municipio,necesidad,mes,ano,contador) select municipio, necesidad, extract(MONTH from FECHA),extract (YEAR from FECHA), count(*) from fase1 group by municipio, necesidad,  extract(MONTH from FECHA), extract(YEAR from FECHA)"
+  ejecutaComandoPsql(query)
+
   write("proceso terminado")
   f.close()
 

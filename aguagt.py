@@ -36,7 +36,7 @@ update pg_database set encoding=8 where datname='sosagua';
 update pg_database set encoding = pg_char_to_encoding('UTF8') where datname = 'sosagua'
 	
 create table public.fase1(
-	fecha timestamp without time zone DEFAULT now(),
+	fecha timestamp without time zone primary key DEFAULT now(),
 	twitjson json not null ,
 	twitstring text not null ,
 	origen text null,
@@ -59,12 +59,12 @@ def insertaTwitt(tjson,tstr):
     try:
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
-        print(tjson)
+        write(tjson)
         cursor.execute(" insert into fase1 (fecha,twitjson,twitstring,origen) values (now() - INTERVAL '1 DAY','" + json.dumps(tjson) + "','" + str(tstr).replace("'",'"') + "','Twitter')")
         conn.commit()
         conn.close()
     except:
-        print("error en insertaTwitt")
+        write("error en insertaTwitt")
 
 
 #instalar el paquete de la siguiente forma:  pip install tweepi
@@ -79,7 +79,7 @@ def sendTwitt():
       tweet = "Hello, world! msg from an py app"
       status = api.update_status(status=tweet) 
   except:
-      print("twitt not send")
+      write("twitt not send")
 
 
 class msg:
@@ -129,10 +129,10 @@ def getTweets(search_words,date_since,number):
             #minedS = minedS.replace("'",'"')
             insertaTwitt(str(mined).replace("'",'"'),s)
         except:
-            print("un json viene malformado")
+            write("un json viene malformado")
 
   except:
-      print("getTweets error")
+      write("getTweets error")
 
 
 def getProcessDate():
@@ -143,7 +143,7 @@ def getProcessDate():
         yesterday = today - datetime.timedelta(days=1)
         return yesterday
     except:
-        print("error en getProcessDate")
+        write("error en getProcessDate")
         
 def convUTF8(cadena):
     try:
@@ -190,7 +190,7 @@ def getLocation():
         conn.close()
         return l
     except:
-        print("error en getLocation")
+        write("error en getLocation")
 
 def ejecutaComandoPsql(query):
     try:
@@ -201,7 +201,7 @@ def ejecutaComandoPsql(query):
         conn.commit()
         conn.close()
     except:
-        print("error en ejecutar comando psql")
+        write("error en ejecutar comando psql")
 
 
 #ADD HERE NEW HASHTAGS
@@ -215,12 +215,11 @@ if __name__ == "__main__":
   print("FASE 1.0 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
   
   for x in hashtags:
-      print(x)
       write(x)
       try:
           getTweets(x,str(fecha),nTwits)
       except:
-          print("error en for de los hashtags, se procede a las fases")
+          write("error en for de los hashtags, se procede a las fases")
 
 
   write('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')

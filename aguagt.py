@@ -48,9 +48,9 @@ create table public.fase1(
 create table cubo1(
 	municipio numeric not null,
 	necesidad numeric not null,
-	mes	text	not null,
-	ano text	not null,
-	contador numeric not null
+	mes	text	 null,
+	ano text	 null,
+	contador numeric  null
 )
 
 '''
@@ -239,9 +239,9 @@ if __name__ == "__main__":
   query = "update fase1  set municipio = m1.id from  municipios m1 where lower(fase1.twitstring) like '%' || lower(m1.municipi_1) || '%'  and fase1.municipio = 0  and fase1.fecha > '" + str(fecha) + " 00:00:00' "
   ejecutaComandoPsql(query)
 
-  write('FASE 1.4 --> borrando datos del mes y ano actual del cubo para actualizar cubo1')
-  query = "delete from fase1 where municipio = 0 "
-  ejecutaComandoPsql(query)
+  #write('FASE 1.4 --> borrando datos del mes y ano actual del cubo para actualizar cubo1')
+  #query = "delete from fase1 where municipio = 0 "
+  #ejecutaComandoPsql(query)
 
 
   write('FASE 1.5 --> actualizando necesidades a tabla fase1')

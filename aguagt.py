@@ -40,8 +40,8 @@ create table public.fase1(
 	twitjson json not null ,
 	twitstring text not null ,
 	origen text null,
-	municipio numeric null default 0,
-	necesidad numeric null default 1
+	municipio numeric  default 0,
+	necesidad numeric  default 1
 )
 
 
@@ -97,8 +97,15 @@ class msg:
 def getTweets(search_words,date_since,number):
   try:
       api = get_api(cfg)
+      places = api.geo_search(query="GUATEMALA", granularity="country")
+      place_id = places[0].id
+      print('*******************')
+      print(places)
+      print('*******************')
+      print(place_id)
+      searchPlace = "place:%s" % place_id
       tweets = tweepy.Cursor(api.search,
-                  q=search_words,
+                  q=searchPlace + ' ' + search_words,
                   lang="es",
                   since=date_since).items(number)
       # Iterate and print tweets
@@ -206,6 +213,7 @@ def ejecutaComandoPsql(query):
 
 #ADD HERE NEW HASHTAGS
 hashtags = ["#AGUAGT", "#SOSAGUAGT", "#SINAGUA"]
+#hashtags = ["#TRAFICOGT"]
 nTwits = 50000
 
 if __name__ == "__main__":
@@ -232,7 +240,7 @@ if __name__ == "__main__":
   ejecutaComandoPsql(query)
 
   write('FASE 1.4 --> borrando datos del mes y ano actual del cubo para actualizar cubo1')
-  query = "delete from fase1 where municipio is null"
+  query = "delete from fase1 where municipio = 0 "
   ejecutaComandoPsql(query)
 
 
@@ -250,6 +258,5 @@ if __name__ == "__main__":
 
   write("proceso terminado")
   f.close()
-
 
 

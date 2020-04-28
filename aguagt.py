@@ -99,14 +99,15 @@ def getTweets(search_words,date_since,number):
       api = get_api(cfg)
       places = api.geo_search(query="GUATEMALA", granularity="country")
       place_id = places[0].id
-      print('*******************')
-      print(places)
-      print('*******************')
-      print(place_id)
+      #print('*******************')
+      #print(places)
+      #print('*******************')
+      #print(place_id)
       searchPlace = "place:%s" % place_id
       tweets = tweepy.Cursor(api.search,
-                  q=searchPlace + ' ' + search_words,
-                  lang="es",
+                  #q=searchPlace + ' ' + search_words,
+                  q=search_words,           
+                  #lang="es",
                   since=date_since).items(number)
       # Iterate and print tweets
       
@@ -212,7 +213,7 @@ def ejecutaComandoPsql(query):
 
 
 #ADD HERE NEW HASHTAGS
-hashtags = ["#AGUAGT", "#SOSAGUAGT", "#SINAGUA"]
+hashtags = ["#AGUAGT", "#SOSAGUAGT"]
 #hashtags = ["#TRAFICOGT"]
 nTwits = 50000
 

@@ -38,7 +38,6 @@ update pg_database set encoding = pg_char_to_encoding('UTF8') where datname = 's
 create table public.fase1(
 	fecha timestamp without time zone primary key DEFAULT now(),
 	twitjson json not null ,
-	twitstring text not null ,
 	origen text null,
 	municipio numeric  default 0,
 	necesidad numeric  default 1
@@ -231,7 +230,7 @@ def ejecutaComandoPsql(query):
 
 
 #ADD HERE NEW HASHTAGS
-hashtags = ["#AGUAGT", "#SOSAGUAGT"]
+hashtags = ["#AGUAGT", "#SOSAGUAGT", '#SINAGUAGT']
 #hashtags = ["#TRAFICOGT"]
 nTwits = 50000
 

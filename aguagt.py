@@ -1,4 +1,4 @@
-import tweepy, psycopg2, os, json, datetime,sys
+import tweepy, psycopg2, os, json, datetime, sys, requests, time
 
 f = open("sosagua.txt", "a")
 #connstr para bd
@@ -94,6 +94,22 @@ class msg:
     self.user = user
   
 
+
+def postMethod(objeto):
+    #url = "http://localhost:3000/incyt/api/sosagua/createalerts"
+    url = "https://arcgis-web.url.edu.gt/incyt/api/sosagua/createalerts"
+    headers = {'content-type': 'application/json'}
+    response = requests.post(url, data = json.dumps(objeto), headers=headers)
+    
+    #print(response.status_code)
+    if response.status_code == 201:
+        print('Success!')
+    else : #response.status_code == 404:
+        print('algo terrible ha ocurrido')
+    return response.status_code
+
+
+
 def getTweets(search_words,date_since,number):
   try:
       api = get_api(cfg)
@@ -131,14 +147,16 @@ def getTweets(search_words,date_since,number):
                             "hashtags":        item.entities['hashtags'],
                             "status_count":    item.user.statuses_count,
                             "place":           convUTF8(item.place),
-                            "source":          item.source
+                            "source":          item.source,
+                            "locationId":      0,
+                            "necesidadId":     0
                         }
+            postMethod(mined)
             #print(mined)
             #minedS = minedS.replace("'",'"')
-            insertaTwitt(str(mined).replace("'",'"'),s)
+            #insertaTwitt(str(mined).replace("'",'"'),s)
         except:
             write("un json viene malformado")
-
   except:
       write("getTweets error")
 

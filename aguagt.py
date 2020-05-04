@@ -271,7 +271,7 @@ if __name__ == "__main__":
   ejecutaComandoPsql(query)
 
   write('FASE 1.6 --> borrando datos del mes y ano actual de tabla cubo1')
-  query = "insert into cubo1 (municipio,necesidad,mes,ano,contador) select municipio, necesidad, extract(MONTH from FECHA),extract (YEAR from FECHA), count(*) from fase1 group by municipio, necesidad,  extract(MONTH from FECHA), extract(YEAR from FECHA)"
+  query = "insert into cubo1 (municipio,necesidad,mes,ano,contador) select municipio, necesidad, extract(MONTH from FECHA),extract (YEAR from FECHA), count(*) from fase1 WHERE extract(MONTH from FECHA) = extract(MONTH from now()) and extract(YEAR from FECHA) = extract(YEAR from now())  group by municipio, necesidad,  extract(MONTH from FECHA), extract(YEAR from FECHA) "
   ejecutaComandoPsql(query)
 
   write("proceso terminado")

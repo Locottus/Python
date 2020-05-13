@@ -1,4 +1,5 @@
 import tweepy, psycopg2, os, json, datetime, sys, requests, time
+import pandas as pd
 
 f = open("sosagua.txt", "a")
 #connstr para bd
@@ -37,7 +38,7 @@ update pg_database set encoding = pg_char_to_encoding('UTF8') where datname = 's
 	
 create table public.fase1(
 	fecha timestamp without time zone primary key DEFAULT now(),
-	twitjson json not null ,
+	textjson text not null ,
 	origen text null,
 	municipio numeric  default 0,
 	necesidad numeric  default 1
@@ -53,17 +54,6 @@ create table cubo1(
 )
 
 '''
-
-def insertaTwitt(tjson,tstr):
-    try:
-        conn = psycopg2.connect(conn_string)
-        cursor = conn.cursor()
-        write(tjson)
-        cursor.execute(" insert into fase1 (fecha,twitjson,twitstring,origen) values (now() - INTERVAL '1 DAY','" + json.dumps(tjson) + "','" + str(tstr).replace("'",'"') + "','Twitter')")
-        conn.commit()
-        conn.close()
-    except:
-        write("error en insertaTwitt")
 
 
 #instalar el paquete de la siguiente forma:  pip install tweepi
@@ -129,8 +119,6 @@ def getTweets(search_words,date_since,number):
       for item in tweets:
         try:
             s = item#este es el string
-            #m = msg(tweet.created_at,tweet.id,tweet.id_str,tweet.text,tweet.entities,tweet.metadata,tweet.source,tweet.user)#este sera el json
-            #json.dumps(m)
             mined = {
                             "id":              item.id,
                             "name":            item.user.name,
@@ -151,9 +139,6 @@ def getTweets(search_words,date_since,number):
                             "necesidadId":     0
                         }
             postMethod(mined)
-            #print(mined)
-            #minedS = minedS.replace("'",'"')
-            #insertaTwitt(str(mined).replace("'",'"'),s)
         except:
             write("un json viene malformado")
   except:
@@ -229,6 +214,38 @@ def ejecutaComandoPsql(query):
         write("error en ejecutar comando psql")
 
 
+def getDataSMS(fecha):
+    #data = pd.read_json('https://arcgis-web.url.edu.gt/incyt/api/sms/getSMS?fecha=2020-05-13')
+    data = pd.read_json('https://arcgis-web.url.edu.gt/incyt/api/sms/getSMS?fecha=' + fecha)    
+    return data
+
+def insertSMS(sms):
+    print('*********')
+    for index, row in sms.iterrows():
+        #print(row.sms['_id'])
+        mined = {
+                            "id":              row.sms['_id'],
+                            "name":            row.sms['address'],
+                            "screen_name":     row.sms['address'],
+                            "retweet_count":   row.sms['date'],
+                            "text":            convUTF8(row.sms['body']),
+                            "location":        "[SMS]",
+                            "coordinates":     "[0,0]",
+                            "geo_enabled":     "false",
+                            "geo":             "false",
+                            "created_at":      row.sms['date'],
+                            "favorite_count":  row.sms['date'],
+                            "hashtags":        "#SOSAGUAGT,#AGUAGT,#SINAGUAGT",
+                            "status_count":    row.sms['read'],
+                            "place":           "[SMS]",
+                            "source":          "SMS",
+                            "locationId":      0,
+                            "necesidadId":     0
+                        }
+        print(mined)
+        postMethod(mined)
+
+
 #ADD HERE NEW HASHTAGS
 hashtags = ["#AGUAGT", "#SOSAGUAGT", '#SINAGUAGT']
 #hashtags = ["#TRAFICOGT"]
@@ -238,7 +255,7 @@ if __name__ == "__main__":
   write("*************************************************************")
   fecha = getProcessDate()
   write(fecha)
-  print("FASE 1.0 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
+  write("FASE 1.0 --> CONECTANDO A TWITTER PARA EXTRAER TWITS DEL DIA")
   
   for x in hashtags:
       write(x)
@@ -247,14 +264,16 @@ if __name__ == "__main__":
       except:
           write("error en for de los hashtags, se procede a las fases")
 
-
+  write("adquiriendo SMS")
+  insertSMS(getDataSMS(fecha))
+  
   write('FASE 1.2 --> AGREGANDO COORDENADAS DE MUNICIPIOS AL QUERY')
-  query = "update fase1  set municipio = m1.id from  municipios m1 where lower(fase1.twitstring) like '%' || lower(m1.departamen_1) || '%' and fase1.municipio = 0  and fase1.fecha > '" + str(fecha) + " 00:00:00' "
+  query = "update fase1  set municipio = m1.id from  municipios m1 where lower(fase1.textjson) like '%' || lower(m1.departamen_1) || '%' and fase1.municipio = 0  and fase1.fecha > '" + str(fecha) + " 00:00:00' "
   ejecutaComandoPsql(query)
 
   write('FASE 1.3 --> BUSCANDO PALABRAS CLAVE PARA CLASIFICACION')
 
-  query = "update fase1  set municipio = m1.id from  municipios m1 where lower(fase1.twitstring) like '%' || lower(m1.municipi_1) || '%'  and fase1.municipio = 0  and fase1.fecha > '" + str(fecha) + " 00:00:00' "
+  query = "update fase1  set municipio = m1.id from  municipios m1 where lower(fase1.textjson) like '%' || lower(m1.municipi_1) || '%'  and fase1.municipio = 0  and fase1.fecha > '" + str(fecha) + " 00:00:00' "
   ejecutaComandoPsql(query)
 
   #write('FASE 1.4 --> borrando datos del mes y ano actual del cubo para actualizar cubo1')
@@ -263,7 +282,7 @@ if __name__ == "__main__":
 
 
   write('FASE 1.5 --> actualizando necesidades a tabla fase1')
-  query = "update fase1  set necesidad = s1.necesidad from  sinonimos s1 where lower(fase1.twitstring) like '%' || lower(s1.sinonimo) || '%'  and extract(MONTH from FECHA) = extract(MONTH from now()) and extract(YEAR from FECHA) = extract(YEAR from now())"
+  query = "update fase1  set necesidad = s1.necesidad from  sinonimos s1 where lower(fase1.textjson) like '%' || lower(s1.sinonimo) || '%'  and extract(MONTH from FECHA) = extract(MONTH from now()) and extract(YEAR from FECHA) = extract(YEAR from now())"
   ejecutaComandoPsql(query)
 
   write('FASE 1.5 --> borrando datos del mes y ano actual de tabla cubo1')

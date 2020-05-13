@@ -1,4 +1,5 @@
 import requests,json,psycopg2,time
+import pandas as pd    
 
 conn_string = "host='localhost' dbname='iotgis' user='postgres' password='password'"
 
@@ -54,8 +55,16 @@ def postMethod(objeto):
         print('algo terrible ha ocurrido')
     return response.status_code
 
+def getData():
+    data = pd.read_json('https://arcgis-web.url.edu.gt/incyt/api/sms/getSMS?fecha=2020-05-13')    
+    #r = requests.get('https://arcgis-web.url.edu.gt/incyt/api/sms/getSMS?fecha=2020-05-13')
+    #print (r.json())
+    #return r.json()
+    return data
 
 
+
+    
 def principal():
     data  = getSQLData()
     resp = postMethod(data)
@@ -71,7 +80,9 @@ def getToday():
 
 #void main()
 print('programa inicia')
-while(True):
-    principal()
-    time.sleep( 60 )#espera de 60 segundos
-    print(time.ctime())
+sms = getData()
+print(sms)
+#while(True):
+#    principal()
+#    time.sleep( 60 )#espera de 60 segundos
+#    print(time.ctime())

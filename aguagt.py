@@ -204,7 +204,8 @@ def getLocation():
 
 def ejecutaComandoPsql(query):
     try:
-        #print(query)
+        print(query)
+        write(query)
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute(query)
@@ -216,7 +217,7 @@ def ejecutaComandoPsql(query):
 
 def getDataSMS(fecha):
     #data = pd.read_json('https://arcgis-web.url.edu.gt/incyt/api/sms/getSMS?fecha=2020-05-13')
-    data = pd.read_json('https://arcgis-web.url.edu.gt/incyt/api/sms/getSMS?fecha=' + fecha)    
+    data = pd.read_json('https://arcgis-web.url.edu.gt/incyt/api/sms/getSMS?fecha=' + str(fecha))    
     return data
 
 def insertSMS(sms):

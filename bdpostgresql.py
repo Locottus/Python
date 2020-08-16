@@ -1,6 +1,6 @@
-import os,sys, psycopg2
+import os,sys, psycopg2, datetime
 
-conn_string = "host='dogmail.cloudapp.net' dbname='dmswitch' user='postgres' password='password'"
+conn_string = "host='localhost' dbname='sosguate' user='postgres' password='Guatemala1'"
 
 
 def hacequery():
@@ -16,12 +16,11 @@ def hacequery():
  
     for row in rows:
         rString = "{'name':" + row[0] +",'lastname':" + row[1] +",'status':" + str(row[2]) + "}"
-        print rString
+        
         #print "   ", row[0],row[1],row[2]
     conn.close()
 
 def haceInsert():
-    print "hacer el insert"
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
     #cursor.execute(""" insert into test (campo1,campo2,estado) values ( 'beatriz','gonzalez',0)  """)
@@ -36,7 +35,7 @@ def haceInsert():
 
 
 def haceUpdate():
-    print "hace el update"
+
     conn = psycopg2.connect(conn_string)
     cursor = conn.cursor()
 #    cursor.execute(""" delete from test where campo1 = 'David'  """)
@@ -45,9 +44,88 @@ def haceUpdate():
     conn.close()
     
 
+def convUTF8(cadena):
+    try:
+        return str(cadena).replace("á","a").replace("é","e").replace("í","i").replace("ó","o").replace("ú","u").replace("ñ","n").replace("Á","A").replace("É","E").replace("Í","I").replace("Ó","O").replace("Ú","U").replace("Ñ","Ñ")
+    except:
+        return cadena
+
+
+def municipios():
+    m = []
+    conn = psycopg2.connect(conn_string)
+    cursor = conn.cursor()
+    cursor.execute('select id, municipi_1 from municipios ')
+    rows = cursor.fetchall()
+ 
+    for row in rows:
+        m.append([row[0],row[1].upper()])
+        #print(row[0],row[1])
+    conn.close()
+    return m
+
+
+def ejecutaComandoPsql(query):
+    try:
+        #print(query)
+        conn = psycopg2.connect(conn_string)
+        cursor = conn.cursor()
+        cursor.execute(query)
+        conn.commit()
+        conn.close()
+    except:
+        write("error en ejecutar comando psql")
+
+
+def getProcessDate():
+    try:
+        from datetime import date
+        today = date.today()
+        yesterday = today - datetime.timedelta(days=1)
+        return yesterday
+    except:
+        write("error en getProcessDate")
+
+
+def msgDiarios(fecha):
+    query = "select textjson from fase1 where fecha > '" + str(fecha) + " 00:00:00' "
+    print(fecha)
+    print(query)
+    conn = psycopg2.connect(conn_string)
+    cursor = conn.cursor()
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    for row in rows:
+        s = convUTF8(row[0]).upper()
+        n = searchMunicipios(s)
+        ejecutaComandoPsql("insert into sosguate(textjson,municipio) values ('" + row[0] + "','" + str(n) + "') ")
+    conn.close()
+
+
+
+def searchMunicipios(message):
+    retorno = 0
+    print(message)
+    for n, m in nombreMunicipios:
+        #print(n,m)
+        if (m in message):
+            print(True, m)
+            retorno = n
+    return retorno
+
+
+    
+
+fecha = getProcessDate()
+nombreMunicipios = municipios()
+
+msgDiarios(fecha)
+
+
+#print(nombreMunicipios)
 #main()
 #haceInsert()
 #haceUpdate()
-hacequery()
+#hacequery()
 
  

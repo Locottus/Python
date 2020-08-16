@@ -204,7 +204,8 @@ def getLocation():
 
 def ejecutaComandoPsql(query):
     try:
-        #print(query)
+        print(query)
+        write(query)
         conn = psycopg2.connect(conn_string)
         cursor = conn.cursor()
         cursor.execute(query)

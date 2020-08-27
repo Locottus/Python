@@ -3,8 +3,8 @@ import glob,os,psycopg2
 
 
 
-#conn_string = "host='localhost' dbname='clima' user='postgres' password='Guatemala1'"
-conn_string = "host='localhost' dbname='hambre' user='postgres' password='Guatemala1'"
+conn_string = "host='localhost' dbname='clima' user='postgres' password='Guatemala1'"
+#conn_string = "host='localhost' dbname='hambre' user='postgres' password='Guatemala1'"
 
 
 #global vars
@@ -30,7 +30,7 @@ def ejecutaComandoPsql(query):
         conn.commit()
         conn.close()
     except:
-        write("error en ejecutar comando psql")
+        write("error en ejecutar comando psql",query)
 
 
 def insetQueryClima(df):
@@ -38,7 +38,7 @@ def insetQueryClima(df):
     query0 = "insert into historico_estaciones (estacion,longitud,latitud,zona_vida,year,mes,dia,lluvia,tmax,tmin,etp,bc) values "
     for index, row in df.iterrows():
         #print(row)
-        query1 = "('" + str(row[0]) + "'," + str(row[1]) + "','"+ str(row[2]) + ",'"+ str(row[3]) + "',"+ str(row[4]) + "','"+ str(row[5]) + "','" + str(row[6]) + "','"  + str(row[7]) + "','"+ str(row[8]) + "','"+ str(row[9]) + "','"+ str(row[10]) + "','"+ str(row[11]) + " );"
+        query1 = "('" + str(row[0]) + "','" + str(row[1]) + "','"+ str(row[2]) + "','"+ str(row[3]) + "','"+ str(row[4]) + "','"+ str(row[5]) + "','" + str(row[6]) + "','"  + str(row[7]) + "','"+ str(row[8]) + "','"+ str(row[9]) + "','"+ str(row[10]) + "','"+ str(row[11]) + "' );"
         ejecutaComandoPsql(query0 + query1)
 
 
@@ -48,9 +48,10 @@ def proyectoClima():
     for file in all_files:
         # Getting the file name without extension
         file_name = os.path.splitext(os.path.basename(file))[0]
+        print(file_name)
         # Reading the file content to create a DataFrame
         #dataFile = pd.read_csv(file, header=None, sep=',')
-        dataFile = pd.read_csv(file, header=0, sep='\t')
+        dataFile = pd.read_csv(file, header=0, sep='\t', encoding = "ISO-8859-1", error_bad_lines=False, index_col=False, dtype='unicode')
         df = pd.DataFrame(dataFile)   
         insetQueryClima(df)
 
@@ -65,29 +66,31 @@ def insetQueryHambre(df):
                 
     query0 = "insert into historico (FECHA_NOTIFICACION	,NO_FICHA   ,SEMANA	,NOTIFICACION_AREA	,NOTIFICACION_DEPARTAMENTO	,NOTIFICACION_MUNICIPIO	,NOTIFICACION_DISTRITO	,CENTRO_SALUD	,PUESTO_SALUD	,CENTRO_CONVERGENCIA	,NOTIFICACION_TIPO_SERVICIO	,NOTIFICACION_SERVICIO	,NOTIFICACION_OTRO_SERVICIO	,ESTABLECIMIENTO_PRIVADO	,HOSPITAL	,ESTABLECIMIENTO	,CODIGO_NOMBRE	,FECHA_NACIMIENTO	,EDAD_ANIOS	,EDAD_MESES	,PROCEDENCIA_DEPARTAMENTO	,PROCEDENCIA_MUNICIPIO	,PROCEDENCIA_LOCALIDAD	,PROCEDENCIA_LOCALIDAD_OTRA	,GRUPO_ETNICO	,OTRA_ETNIA	,SEXO	,PESO	,TALLA	,PARENTESCO	,FECHA_DETECCION	,LACTANCIA_MENOR_SEIS	,LACTANCIA_SEIS_DOS	,ACTUAL_TOS	,ACTUAL_FIEBRE	,ACTUAL_DIARREA	,ACTUAL_EDEMA	,ANTES_TOS	,ANTES_FIEBRE	,ANTES_DIARREA	,ANTES_EDEMA	,EDEMA_ANTERIOR	,TRATAMIENTO	,TRATAMIENTO_TIEMPO	,PESO_NACER	,HEMANOS_MENORES	,HERMANOS_MAYORES	,MENORES_FALLECIDOS	,MENORES_EDEMA	,ABASTECIMIENTO_AGUA	,OTRO_ABASTECIMIENTO_AGUA	,DISPOSICION_EXCRETAS	,DISPOSICION_EXCRETAS_OTRO	,DISPOSICION_BASURA	,DISPOSICION_BASURA_OTRO	,SITUACION_LABORAL	,INGRESO_FAMILIAR	,TIPO_VIVIENDA	,FUENTE_INGRESO1	,FUENTE_INGRESO2	,FUENTE_INGRESO3	,RECIBE_AYUDA_EXTRANJERO	,MFAMILIA_PROGRESA	,BOLSA_SOLIDARIA	,MCOMUNI_PRODUCE	,MAGA_BOLSA	,MAGA_PROYECTOS	,MAGA_FERTILIZANTES	,MAGA_HUERTOS	,MAGA_POLLOS	,MAGA_GALLINAS	,PRORURAL	,AGUAFUENTEPAZ	,OTROS_FACTOR_RIESGO	,HA_VENDIDO	,RESERVA_ALIMENTOS	,TIEMPO_RESERVA	,TIEMPOS_COMIDA	,DIAGNOSTICO_CLINICO,DIAGNOSTICO_MEDICION,REFERIDO   ,REFERIDO_DONDE	,CONDICION  ) values "
     for index, row in df.iterrows():
-        #TODO replace char ' in all strings
 
+        try:
+            query1 = "('" + str(row[0]).replace("'"," ")+ "','" + str(row[1]).replace("'"," ")+ "','"+ str(row[2]).replace("'"," ")+ "','"+ str(row[3]).replace("'"," ")+ "','"+ str(row[4]).replace("'"," ")+ "','"+ str(row[5]).replace("'"," ")+ "','" + str(row[6]).replace("'"," ")+ "','"  + str(row[7]).replace("'"," ")+ "','"+ str(row[8]).replace("'"," ")+ "','"+ str(row[9]).replace("'"," ")+ "','"+ str(row[10]).replace("'"," ") + "','" #+ str(row[11]).replace("'"," ")+ " );"
+            query2 =   str(row[11]).replace("'"," ")+ "','" + str(row[12]).replace("'"," ")+ "','"+ str(row[13]).replace("'"," ")+ "','"+ str(row[14]).replace("'"," ")+ "','"+ str(row[15]).replace("'"," ")+ "','"+ str(row[16]).replace("'"," ")+ "','" + str(row[17]).replace("'"," ")+ "','"  + str(row[18]).replace("'"," ")+ "','"+ str(row[19]).replace("'"," ")+ "','"+ str(row[20]).replace("'"," ")+ "','"
+            query3 =   str(row[21]).replace("'"," ")+ "','" + str(row[22]).replace("'"," ")+ "','"+ str(row[23]).replace("'"," ")+ "','"+ str(row[24]).replace("'"," ")+ "','"+ str(row[25]).replace("'"," ")+ "','"+ str(row[26]).replace("'"," ")+ "','" + str(row[27]).replace("'"," ")+ "','"  + str(row[28]).replace("'"," ")+ "','"+ str(row[29]).replace("'"," ")+ "','"+ str(row[30]).replace("'"," ")+ "','"
+            query4 =   str(row[31]).replace("'"," ")+ "','" + str(row[32]).replace("'"," ")+ "','"+ str(row[33]).replace("'"," ")+ "','"+ str(row[34]).replace("'"," ")+ "','"+ str(row[35]).replace("'"," ")+ "','"+ str(row[36]).replace("'"," ")+ "','" + str(row[37]).replace("'"," ")+ "','"  + str(row[38]).replace("'"," ")+ "','"+ str(row[39]).replace("'"," ")+ "','"+ str(row[40]).replace("'"," ")+ "','"
+            query5 =   str(row[41]).replace("'"," ")+ "','" + str(row[42]).replace("'"," ")+ "','"+ str(row[43]).replace("'"," ")+ "','"+ str(row[44]).replace("'"," ")+ "','"+ str(row[45]).replace("'"," ")+ "','"+ str(row[46]).replace("'"," ")+ "','" + str(row[47]).replace("'"," ")+ "','"  + str(row[48]).replace("'"," ")+ "','"+ str(row[49]).replace("'"," ")+ "','"+ str(row[50]).replace("'"," ")+ "','"
 
-        query1 = "('" + str(row[0]).replace("'"," ")+ "','" + str(row[1]).replace("'"," ")+ "','"+ str(row[2]).replace("'"," ")+ "','"+ str(row[3]).replace("'"," ")+ "','"+ str(row[4]).replace("'"," ")+ "','"+ str(row[5]).replace("'"," ")+ "','" + str(row[6]).replace("'"," ")+ "','"  + str(row[7]).replace("'"," ")+ "','"+ str(row[8]).replace("'"," ")+ "','"+ str(row[9]).replace("'"," ")+ "','"+ str(row[10]).replace("'"," ") + "','" #+ str(row[11]).replace("'"," ")+ " );"
-        query2 =   str(row[11]).replace("'"," ")+ "','" + str(row[12]).replace("'"," ")+ "','"+ str(row[13]).replace("'"," ")+ "','"+ str(row[14]).replace("'"," ")+ "','"+ str(row[15]).replace("'"," ")+ "','"+ str(row[16]).replace("'"," ")+ "','" + str(row[17]).replace("'"," ")+ "','"  + str(row[18]).replace("'"," ")+ "','"+ str(row[19]).replace("'"," ")+ "','"+ str(row[20]).replace("'"," ")+ "','"
-        query3 =   str(row[21]).replace("'"," ")+ "','" + str(row[22]).replace("'"," ")+ "','"+ str(row[23]).replace("'"," ")+ "','"+ str(row[24]).replace("'"," ")+ "','"+ str(row[25]).replace("'"," ")+ "','"+ str(row[26]).replace("'"," ")+ "','" + str(row[27]).replace("'"," ")+ "','"  + str(row[28]).replace("'"," ")+ "','"+ str(row[29]).replace("'"," ")+ "','"+ str(row[30]).replace("'"," ")+ "','"
-        query4 =   str(row[31]).replace("'"," ")+ "','" + str(row[32]).replace("'"," ")+ "','"+ str(row[33]).replace("'"," ")+ "','"+ str(row[34]).replace("'"," ")+ "','"+ str(row[35]).replace("'"," ")+ "','"+ str(row[36]).replace("'"," ")+ "','" + str(row[37]).replace("'"," ")+ "','"  + str(row[38]).replace("'"," ")+ "','"+ str(row[39]).replace("'"," ")+ "','"+ str(row[40]).replace("'"," ")+ "','"
-        query5 =   str(row[41]).replace("'"," ")+ "','" + str(row[42]).replace("'"," ")+ "','"+ str(row[43]).replace("'"," ")+ "','"+ str(row[44]).replace("'"," ")+ "','"+ str(row[45]).replace("'"," ")+ "','"+ str(row[46]).replace("'"," ")+ "','" + str(row[47]).replace("'"," ")+ "','"  + str(row[48]).replace("'"," ")+ "','"+ str(row[49]).replace("'"," ")+ "','"+ str(row[50]).replace("'"," ")+ "','"
+            query6 =   str(row[51]).replace("'"," ")+ "','" + str(row[52]).replace("'"," ")+ "','"+ str(row[53]).replace("'"," ")+ "','"+ str(row[54]).replace("'"," ")+ "','"+ str(row[55]).replace("'"," ")+ "','"+ str(row[56]).replace("'"," ")+ "','" + str(row[57]).replace("'"," ")+ "','"  + str(row[58]).replace("'"," ")+ "','"+ str(row[59]).replace("'"," ")+ "','"+ str(row[60]).replace("'"," ")+ "','"
+            query7 =   str(row[61]).replace("'"," ")+ "','" + str(row[62]).replace("'"," ")+ "','"+ str(row[63]).replace("'"," ")+ "','"+ str(row[64]).replace("'"," ")+ "','"+ str(row[65]).replace("'"," ")+ "','"+ str(row[66]).replace("'"," ")+ "','" + str(row[67]).replace("'"," ")+ "','"  + str(row[68]).replace("'"," ")+ "','"+ str(row[69]).replace("'"," ")+ "','"+ str(row[70]).replace("'"," ")+ "','"
+            query8 =   str(row[71]).replace("'"," ")+ "','" + str(row[72]).replace("'"," ")+ "','"+ str(row[73]).replace("'"," ")+ "','"+ str(row[74]).replace("'"," ")+ "','"+ str(row[75]).replace("'"," ")+ "','"+ str(row[76]).replace("'"," ")+ "','" + str(row[77]).replace("'"," ")+ "','"  + str(row[78]).replace("'"," ")+ "','"+ str(row[79]).replace("'"," ")+ "','"+ str(row[80]).replace("'"," ")+ "','"
+            query9 =   str(row[81]).replace("'"," ")+ "','" + str(row[82]).replace("'"," ")+ "');"
 
-        query6 =   str(row[51]).replace("'"," ")+ "','" + str(row[52]).replace("'"," ")+ "','"+ str(row[53]).replace("'"," ")+ "','"+ str(row[54]).replace("'"," ")+ "','"+ str(row[55]).replace("'"," ")+ "','"+ str(row[56]).replace("'"," ")+ "','" + str(row[57]).replace("'"," ")+ "','"  + str(row[58]).replace("'"," ")+ "','"+ str(row[59]).replace("'"," ")+ "','"+ str(row[60]).replace("'"," ")+ "','"
-        query7 =   str(row[61]).replace("'"," ")+ "','" + str(row[62]).replace("'"," ")+ "','"+ str(row[63]).replace("'"," ")+ "','"+ str(row[64]).replace("'"," ")+ "','"+ str(row[65]).replace("'"," ")+ "','"+ str(row[66]).replace("'"," ")+ "','" + str(row[67]).replace("'"," ")+ "','"  + str(row[68]).replace("'"," ")+ "','"+ str(row[69]).replace("'"," ")+ "','"+ str(row[70]).replace("'"," ")+ "','"
-        query8 =   str(row[71]).replace("'"," ")+ "','" + str(row[72]).replace("'"," ")+ "','"+ str(row[73]).replace("'"," ")+ "','"+ str(row[74]).replace("'"," ")+ "','"+ str(row[75]).replace("'"," ")+ "','"+ str(row[76]).replace("'"," ")+ "','" + str(row[77]).replace("'"," ")+ "','"  + str(row[78]).replace("'"," ")+ "','"+ str(row[79]).replace("'"," ")+ "','"+ str(row[80]).replace("'"," ")+ "','"
-        query9 =   str(row[81]).replace("'"," ")+ "','" + str(row[82]).replace("'"," ")+ "');"
+            #print(query0,query1,query2,query3,query4,query5,query6,query7,query8,query9)
+            #print('')
+            ejecutaComandoPsql(query0+query1+query2+query3+query4+query5+query6+query7+query8+query9)
 
-        #print(query0,query1,query2,query3,query4,query5,query6,query7,query8,query9)
-        #print('')
-        ejecutaComandoPsql(query0+query1+query2+query3+query4+query5+query6+query7+query8+query9)
-
-
+        except:
+            print('error en creacion de query, pero continuamos')
 
 def proyectoHambre():
     print('inicia proyecto hambre')
     for file in all_files:
+        print('*****************************************************************************')
+        print(file)
         file_name = os.path.splitext(os.path.basename(file))[0]
         dataFile = pd.read_csv(file, header=0, sep='\t', encoding = "ISO-8859-1", error_bad_lines=False, index_col=False, dtype='unicode')
         df = pd.DataFrame(dataFile)
@@ -97,8 +100,8 @@ def proyectoHambre():
 
 #main()
 print('inicia programa')
-#proyectoClima()
-proyectoHambre()
+proyectoClima()
+#proyectoHambre()
 print('programa terminado')
 
 

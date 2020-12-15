@@ -1,10 +1,8 @@
 import os,sys, psycopg2,flask,jsonify,request,json
 from flask_cors import CORS
 
-#https://tecadmin.net/install-python-3-7-on-ubuntu-linuxmint/
-#https://bitlaunch.io/blog/create-a-bitcoin-node-with-ubuntu/
 
-conn_string = "host='localhost' dbname='swift' user='postgres' password='Guatemala1'"
+conn_string = "host='localhost' dbname='swift' user='postgres' password='pwd111'"
 NETWORK = 'testnet'
 
 def getMessages(toMsg):
@@ -50,7 +48,7 @@ def borrarMensaje(tomsg):
 
 
 
-#https://github.com/ranaroussi/pywallet
+
 def wall3():
     # create_btc_wallet.py
     from pywallet import wallet
@@ -84,7 +82,6 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 
 
-#http://localhost:1500/api/getNewChild?publicKey=xpub661MyMwAqRbcGsyLJDoXQeiW8cwuqhoyUcuKq6hG2x9Wp9fKtD2zkDR2uDqTrxMFAskzBTWDmoDssaoUHvTWo6aUntmTBwPvvF2doLCQJ2d&publicChildNum=11
 @app.route('/api/getNewChild',methods=['GET'])
 def createNewChildWallet():
     publicKey = request.args.get('publicKey')
@@ -141,5 +138,4 @@ if __name__ == '__main__':
     print("starting chat service")
     #app.run(ssl_context='adhoc',host='0.0.0.0', port=1500)
     app.run(host='0.0.0.0', port=1500)
-    #createKey('xpub661MyMwAqRbcGsyLJDoXQeiW8cwuqhoyUcuKq6hG2x9Wp9fKtD2zkDR2uDqTrxMFAskzBTWDmoDssaoUHvTWo6aUntmTBwPvvF2doLCQJ2d',11)
 

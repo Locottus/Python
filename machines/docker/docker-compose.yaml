@@ -1,0 +1,20 @@
+
+version: '3'
+services:
+ nginxService:
+  image: nginx_php
+  restart: always
+  volumes:
+   - /var/www/html/:/usr/share/nginx/html/
+  ports:
+   - 80:80
+   - 443:443
+ postgresql:
+  image: postgres
+  restart: always
+  ports:
+   - 5432:5432
+  environment:
+   POSTGRES_PASSWORD: 'Guatemala1'
+  volumes:
+   - /var/postgresql:/var/lib/postgresql/data

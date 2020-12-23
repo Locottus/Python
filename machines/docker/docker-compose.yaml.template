@@ -1,0 +1,41 @@
+version: '3'
+services:
+ nginxService:
+  image: nginx
+  restart: always
+  volumes:
+   - /var/www/html/:/usr/share/nginx/html/
+
+  ports:
+   - 80:80
+   - 443:443
+ mysqlService:
+  image: mysql:8.0
+  restart: always
+  volumes:
+   - /var/opt/mysql:/var/lib/mysql
+  ports:
+   - 3306:3306
+  environment:
+   MYSQL_DATABASE: 'mysqlDB'
+   MYSQL_ROOT_PASSWORD: 'Guatemala1'
+   MYSQL_USER: 'locottus'
+   MYSQL_PASS: 'Guatemala1'
+ mysqlAdminService:
+  image: phpmyadmin
+  ports:
+   - 8080:80
+  environment:
+   PMA_HOST: '192.168.1.14'
+   PMA_PASSWORD: 'Guatemala1'
+   PMA_USER: 'root'
+   PMA_PORT: '3306'
+ postgresql:
+  image: postgres
+  restart: always
+  ports:
+   - 5432:5432
+  environment:
+   POSTGRES_PASSWORD: 'Guatemala1'
+  volumes:
+   - /var/postgresql:/var/lib/postgresql/data

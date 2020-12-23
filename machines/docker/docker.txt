@@ -1,0 +1,6 @@
+#to connect to docker container
+docker exec -it my-postgres bash
+#to connect to db
+psql -U postgres
+
+

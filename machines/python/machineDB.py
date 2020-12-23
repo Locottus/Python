@@ -1,5 +1,5 @@
 import psycopg2
-conn_string = "host='192.168.1.13' dbname='Machine' user='postgres' password='Guatemala1'"
+conn_string = "host='localhost' dbname='machine' user='postgres' password='Guatemala1'"
 
 def ejecutaComandoPsql(query):
     try:
@@ -32,4 +32,4 @@ def hacequery():
     conn.close()
 
 
-
+ejecutaComandoPsql('sELECT CURRENT_DATE')

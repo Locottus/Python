@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import os,time,jwt
+import os,time
 from flask import Flask, abort, request, jsonify, g, url_for
 #from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth

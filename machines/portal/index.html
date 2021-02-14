@@ -13,7 +13,57 @@
 <!-- Latest compiled and minified JavaScript -->
 <script src="http://localhost/bootstrap-3.3.7-dist/js/bootstrap.min.js"  crossorigin="anonymous"></script>
 
+<script>
 
+function left(){
+	console.log('pushed left');
+          $.post( "localhost:5000/api/left", data, function(response){ 
+            if ("{'msg':'OK'}" === response){
+              //alert("La informacion ha sido enviada correctamente. " );
+              document.getElementById("resultado").innerHTML = "Asistencia enviada correctamente";
+              console.log('INFO ENVIADA CORRECTAMENTE!');
+              //document.getElementById("btnEnviar").disabled = true;
+              //location.reload();
+            }else{
+              alert ("hubo un error al enviar el mensaje, por favor intente despues");
+              console.log("error enviando la informacion de asistencia");
+
+            }
+
+          });	
+}
+
+function right(){
+	console.log('pushed right');
+          $.post( "localhost:5000/api/right", data, function(response){ 
+            if ("{'msg':'OK'}" === response){
+              //alert("La informacion ha sido enviada correctamente. " );
+              document.getElementById("resultado").innerHTML = "Asistencia enviada correctamente";
+              console.log('INFO ENVIADA CORRECTAMENTE!');
+              //document.getElementById("btnEnviar").disabled = true;
+              //location.reload();
+            }else{
+              alert ("hubo un error al enviar el mensaje, por favor intente despues");
+              console.log("error enviando la informacion de asistencia");
+
+            }
+
+          });	
+}
+
+
+function enviarComandoStepper(){
+          
+
+}
+      
+    
+  
+
+
+
+
+</script>
 
 </head>
 
@@ -37,7 +87,11 @@
 
 
 <div class="container">
-<h1>main form TODO</h1>
+<h1>MAIN WINDOW CONTROL</h1>
+</div>
+<div>
+	<button class="btn btn-primary btn-lg navbar-btn" onclick="left();" >LEFT</button>
+      <button class="btn btn-danger btn-lg navbar-btn" onclick="right();">RIGHT</button>
 </div>
 
 

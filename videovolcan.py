@@ -1,7 +1,5 @@
 import os
 import psycopg2
-from shutil import copyfile
-from shutil import rmtree
 from sys import exit
 
 
@@ -38,7 +36,9 @@ def saveVideo():
     arch = pathVideos + str(dateYesterday()).replace('-','') + '.mp4'
     imgs = temporalFolder + '/*.jpg' 
     #os.system("ffmpeg -r 1 -i img%01d.png -vcodec mpeg4 -y archivo.mp4 ")
-    os.system("ffmpeg -r 1 -i " + imgs + " -vcodec mpeg4 -y " destinationVideo + '/' + arch  )
+    #ffmpeg -r 1 -i *.jpg -vcodec mpeg4 -y archivo.mp4
+    os.system("ffmpeg -r 1 -i " + imgs + " -vcodec mpeg4 -y " +  destinationVideo + '/' + arch  )
+    print(arch)
     return arch
 
 
@@ -52,17 +52,20 @@ def runYesterdayVideo():
     cursor = conn.cursor()
     cursor.execute(q)
     rows = cursor.fetchall()
- 
+
     for row in rows:
-        filename = row[0]
-        copiarImagen(sourceImages + '/' + row[0], temporalFolder + '/' + row[0])
+        filename = row[0] + '.jpg'
+        #copiarImagen(sourceImages + '/' + row[0], temporalFolder + '/' + row[0])
+        cpCommand = " cp " + sourceImages + '/' + filename + " "  + temporalFolder + '/' + filename
+        #print(cpCommand)
+        os.system(cpCommand)
 
     conn.close()
     arch = saveVideo()
     copiarImagen(temporalFolder + '/*.mp4' ,destinationVideo + '/' )
-    query = "insert into videos_volcanes (fecha,video) values (current_timestamp, '" destinationVideo + '/' + arch + "')"
-    updatetData(query)
-
+    #query = "insert into videos_volcanes (fecha,video) values (current_timestamp, '" + destinationVideo + '/' + arch + "')"
+    #updatetData(query)
+    
 
 def updatetData(query):
     print(query)
@@ -90,7 +93,8 @@ if __name__ == '__main__':
     print ("The current working directory is %s" % path)
 
     try:
-        shutil.rmtree(temporalFolder, ignore_errors=True)
+        os.system( ' rm -rf ' + temporalFolder )
+        #shutil.rmtree(temporalFolder, ignore_errors=True)
     except:
         print('cannot delete folder',temporalFolder)
 
@@ -100,4 +104,4 @@ if __name__ == '__main__':
         print ("Creation of the directory %s failed" % path)
 
     
-    runYesterdayVideo()
+    #runYesterdayVideo()

@@ -38,7 +38,8 @@ def saveVideo():
     arch = pathVideos + str(dateYesterday()).replace('-','') + '.mp4'
     imgs = temporalFolder + '/*.jpg' 
     #os.system("ffmpeg -r 1 -i img%01d.png -vcodec mpeg4 -y archivo.mp4 ")
-    os.system("ffmpeg -r 1 -i " + imgs + " -vcodec mpeg4 -y " + arch + ")
+    os.system("ffmpeg -r 1 -i " + imgs + " -vcodec mpeg4 -y " destinationVideo + '/' + arch  )
+    return arch
 
 
 def runYesterdayVideo():
@@ -53,20 +54,35 @@ def runYesterdayVideo():
     rows = cursor.fetchall()
  
     for row in rows:
-        print(row)
         filename = row[0]
-        #copiarImagen('','')
+        copiarImagen(sourceImages + '/' + row[0], temporalFolder + '/' + row[0])
 
     conn.close()
+    arch = saveVideo()
+    copiarImagen(temporalFolder + '/*.mp4' ,destinationVideo + '/' )
+    query = "insert into videos_volcanes (fecha,video) values (current_timestamp, '" destinationVideo + '/' + arch + "')"
+    updatetData(query)
 
 
+def updatetData(query):
+    print(query)
+    conn = psycopg2.connect(db_string)
+    cursor = conn.cursor()
+    try:
+        cursor.execute(query)
+    except:
+        print('*************************** could not insert*********************************')
+        print(query)
+    conn.commit()
+    conn.close()
 
 
 
 #void main()
 if __name__ == '__main__':
     print("starting")
-    dateYesterday()
+    
+
     #change to working directory
     os.chdir(pathVideos)
 

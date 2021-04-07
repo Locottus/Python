@@ -4,21 +4,19 @@ from sys import exit
 import cv2
 import numpy as np
 
-
-#https://www.codegrepper.com/code-examples/python/python+script+to+convert+mp4+to+jpgs
-
-db_string = 'postgres://postgres:Guatemala1@localhost:5432/hashfiles'
+db_string = 'postgres://postgres:postgres2020!Incyt@172.17.250.12:5432/hashFiles'
+#db_string = 'postgres://postgres:Guatemala1@localhost:5432/hashfiles'
 sourceImages = '/home/incyt/servicio/uploads'
-destinationVideo = '/home/incyt/servicio/uploads/videos'
-temporalFolder ='/videosVolcanes/tmp'
-pathVideos = '/videosVolcanes/'
-urlVideos = 'https://incyt.url.edu.gt/incyt/api/HashFiles/uploads/videos/'
+destinationVideo = '/home/incyt/servicio/uploads/videos_volcanes'
+#temporalFolder ='/videosVolcanes/tmp'
+#pathVideos = '/videosVolcanes/'
+urlVideos = 'https://incyt.url.edu.gt/incyt/api/HashFiles/uploads/videos_volcanes/'
 
 #docker run -it -v /videosVolcanes/tmp:/tmp/ -v /home/incyt/servicio/uploads:/uploads -v /home/incyt/servicio/uploads/videos:/videos -m 2g --cpus=1 --cpu-shares=50 linuxffmpeg
 #disk utils
 
 files = []
-fps = 40
+fps = 30
 frame_array = []
 
 def dateYesterday():
@@ -35,7 +33,6 @@ def dateYesterday():
 
 def runYesterdayVideo():
 
-
     y = str(dateYesterday())
     y0 = y + ' 00:00:00'
     y1 = y + ' 23:59:00'
@@ -48,10 +45,13 @@ def runYesterdayVideo():
 
     for row in rows:
         filename = row[0] + '.jpg'
-        files.append(temporalFolder + '/' + filename)
+        files.append(sourceImages + '/' + filename)
     conn.close()
-    arch = pathVideos + str(dateYesterday()).replace('-','') + '.avi'
-
+    print("number of images to process:" , len(files))
+    #print(files)
+    archName = str(dateYesterday()).replace('-','') + '.avi'
+    arch = destinationVideo + '/' + archName
+    print(arch)
     for i in range(len(files)):
         img = cv2.imread(files[i])
         size = (640,480)
@@ -61,6 +61,10 @@ def runYesterdayVideo():
     for i in range(len(frame_array)):
         out.write(frame_array[i])
     out.release()
+    
+    query = "insert into videos_volcanes (fecha,video) values (current_timestamp, '" +  urlVideos + archName + "')"
+    updatetData(query)
+
     print('end')
 
    
@@ -78,8 +82,10 @@ def updatetData(query):
     conn.close()
 
 
+#https://medium.com/@iKhushPatel/convert-video-to-images-images-to-video-using-opencv-python-db27a128a481
 
 #void main()
 if __name__ == '__main__':
     print("starting")
     runYesterdayVideo()
+

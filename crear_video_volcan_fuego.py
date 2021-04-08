@@ -15,9 +15,8 @@ urlVideos = 'https://incyt.url.edu.gt/incyt/api/HashFiles/uploads/videos_volcane
 #docker run -it -v /videosVolcanes/tmp:/tmp/ -v /home/incyt/servicio/uploads:/uploads -v /home/incyt/servicio/uploads/videos:/videos -m 2g --cpus=1 --cpu-shares=50 linuxffmpeg
 #disk utils
 
-files = []
-fps = 30
-frame_array = []
+fps = 20
+size = (640,480)
 
 def dateYesterday():
     from datetime import date
@@ -34,38 +33,44 @@ def dateYesterday():
 def runYesterdayVideo():
 
     y = str(dateYesterday())
-    y0 = y + ' 00:00:00'
-    y1 = y + ' 23:59:00'
-    q = "select filename from filecatalog where fecha between '"+ y0 +"' and '" + y1 + "'  order by fecha asc "
-    print(q)
-    conn = psycopg2.connect(db_string)
-    cursor = conn.cursor()
-    cursor.execute(q)
-    rows = cursor.fetchall()
-
-    for row in rows:
-        filename = row[0] + '.jpg'
-        files.append(sourceImages + '/' + filename)
-    conn.close()
-    print("number of images to process:" , len(files))
-    #print(files)
-    archName = str(dateYesterday()).replace('-','') + '.avi'
-    arch = destinationVideo + '/' + archName
-    print(arch)
-    for i in range(len(files)):
-        img = cv2.imread(files[i])
-        size = (640,480)
-        frame_array.append(img)
-    out = cv2.VideoWriter(arch,cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
-
-    for i in range(len(frame_array)):
-        out.write(frame_array[i])
-    out.release()
+    print(y)
+    for x in range(0,24):
+        #print(x)
     
-    query = "insert into videos_volcanes (fecha,video) values (current_timestamp, '" +  urlVideos + archName + "')"
-    updatetData(query)
+        y0 = y + ' ' + str(x).zfill(2) + ':00:00'
+        y1 = y + ' ' + str(x).zfill(2) + ':59:00'
+        q = "select filename from filecatalog where fecha between '"+ y0 +"' and '" + y1 + "'  order by fecha asc "
+        frame_array = []
+        files = []
+        print(q)
+        conn = psycopg2.connect(db_string)
+        cursor = conn.cursor()
+        cursor.execute(q)
+        rows = cursor.fetchall()
 
-    print('end')
+        for row in rows:
+            filename = row[0] + '.jpg'
+            files.append(sourceImages + '/' + filename)
+        conn.close()
+        
+        print("number of images to process:" , len(files))
+        if (len(files) > 200):
+            
+            archName = str(dateYesterday()).replace('-','') +'_' + str(x).zfill(2) +  '.avi'
+            arch = destinationVideo + '/' + archName
+            print(arch)
+            for i in range(len(files)):
+                img = cv2.imread(files[i])
+                frame_array.append(img)
+            out = cv2.VideoWriter(arch,cv2.VideoWriter_fourcc(*'DIVX'), fps, size)
+
+            for i in range(len(frame_array)):
+                out.write(frame_array[i])
+            out.release()
+            
+            query = "insert into videos_volcanes (fecha,video,numFotos) values ('" + y0 +"', '" +  urlVideos + archName + "','" + str(len(files)) +"')"
+            updatetData(query)
+
 
    
 
@@ -88,4 +93,14 @@ def updatetData(query):
 if __name__ == '__main__':
     print("starting")
     runYesterdayVideo()
+
+
+'''
+create table videos_volcanes(
+	fecha date not null default CURRENT_TIMESTAMP,
+	video text not null unique,
+    numFotos numeric null
+)
+'''
+
 

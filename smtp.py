@@ -1,14 +1,17 @@
 #!/usr/bin/python3
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 #https://www.tutorialspoint.com/python3/python_sending_email.htm
-
+#https://www.javacodemonk.com/send-rich-text-multimedia-email-in-python-d21c900f
 
 sender = 'incyt@url.edu.gt'
 subject = ''
 receivers = []
+msg = MIMEMultipart()
 
-html_format = "MIME-Version: 1.0\nContent-type: text/html\nSubject: SMTP HTML e-mail test\n"
+#html_format = "MIME-Version: 1.0\nContent-type: text/html\nSubject: SMTP HTML e-mail test\n"
 
 
 def readReceivers():
@@ -37,25 +40,31 @@ def readSubject():
 
 def sendMessages():
     print('sending emails')
-    bodyMessage = readBodyMessage()  
+    bodyMessage = readBodyMessage()
+    print(bodyMessage)
     subject = readSubject()
     for receiver in receivers:
         print("*************************************************************")
         try:
-            
-            message = str(f"From: Incyt URL <{sender}>\nTo: <{receiver}>\nSubject: {subject}\n{bodyMessage}").encode("ascii", "replace")
-            print(message)
+            print(receiver)
+            msg['From'] = sender
+            msg['To'] = receiver
+            msg['Subject'] = subject
+            msg.attach(MIMEText(bodyMessage, 'plain'))
+            #msg.attach(MIMEText(bodyMessage, 'html')) #to send html messages
+            text = msg.as_string()
+
             smtpObj = smtplib.SMTP('smtpdti.url.edu.gt')
-            smtpObj.sendmail(sender, receiver, message)
+            smtpObj.sendmail(sender, receiver, text)
             print ("Successfully sent email")
+            smtpObj.quit()
         except:
             print ("Error: unable to send email")
 
 
+
 if __name__ == "__main__":
 
-
-    readBodyMessage()
     readReceivers()
     sendMessages()
     print('end of process')

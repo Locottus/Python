@@ -9,7 +9,6 @@ from email.mime.text import MIMEText
 sender = 'incyt@url.edu.gt'
 subject = ''
 receivers = []
-msg = MIMEMultipart()
 
 #html_format = "MIME-Version: 1.0\nContent-type: text/html\nSubject: SMTP HTML e-mail test\n"
 
@@ -46,6 +45,7 @@ def sendMessages():
     for receiver in receivers:
         print("*************************************************************")
         try:
+            msg = MIMEMultipart()
             print(receiver)
             msg['From'] = sender
             msg['To'] = receiver

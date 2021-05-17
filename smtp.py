@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 #https://www.tutorialspoint.com/python3/python_sending_email.htm
 #https://www.javacodemonk.com/send-rich-text-multimedia-email-in-python-d21c900f
 
-sender = 'incyt@url.edu.gt'
+sender = 'Incyt <incyt@url.edu.gt>'
 subject = ''
 receivers = []
 

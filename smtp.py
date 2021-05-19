@@ -1,6 +1,5 @@
 #!/usr/bin/python3
-import re
-import smtplib
+import smtplib, re
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import pandas as pd
@@ -17,7 +16,7 @@ regexEmail = '^(\w|\.|\_|\-)+[@](\w|\_|\-|\.)+[.]\w{2,3}$'
 
 def checkEmail(email):
     if(re.search(regexEmail, email)):
-        print("Valid Email",email)
+        #print("Valid Email",email)
         return True
     else:
         print("Invalid Email",email)
@@ -55,10 +54,10 @@ def sendMessages():
     print(bodyMessage)
     subject = readSubject()
     for receiver in receivers:
-        print("*************************************************************")
+        #print("*************************************************************")
         try:
             msg = MIMEMultipart()
-            print(receiver)
+            #print(receiver)
             msg['From'] = sender
             msg['To'] = receiver
             msg['Subject'] = subject
@@ -68,7 +67,7 @@ def sendMessages():
 
             smtpObj = smtplib.SMTP('smtpdti.url.edu.gt')
             smtpObj.sendmail(sender, receiver, text)
-            print ("Successfully sent email")
+            #print ("Successfully sent email")
             smtpObj.quit()
         except:
             print ("Error: unable to send email")
